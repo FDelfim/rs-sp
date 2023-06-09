@@ -1,0 +1,24 @@
+.progresso {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+}
+
+.radio {
+  font-size: 1.5em;
+}
+
+.radio::after {
+  content: '';
+  display: block;
+  width: 0;
+  height: 2px;
+  background: #000;
+  transition: width .3s;
+}
+
+.radio:checked {
+  background-color: rgb(3, 150, 101) !important;
+}
