@@ -130,10 +130,10 @@ export function Questions() {
         <Box p='2' mx={[4, 8]} >
           {questionnaires.map((questionnaire) => (
           <Box key={'questionnaire-' + questionnaire.id} display='flex' flexDirection={'column'} h='85vh' justifyContent='space-between'>
-            <Text fontSize={['2xl','4xl']} textAlign='center' textTransform='uppercase'>{questionnaire.name}</Text>
-            <Text px={['5', '10']} fontSize={['md', '2xl', '3xl']} textAlign='center'>
-              Olá {user?.name}! Responda as questões objetivamente com o grau de certeza que você possui sobre as questões descritas abaixo, sendo <br/>
-              1 ponto (Absolutamente não concordo) e 5 pontos (Absolutamente concordo).
+            <Text fontSize={['xl','4xl']} textAlign='center' textTransform='uppercase'>{questionnaire.name}</Text>
+            <Text px={['5', '10']} fontSize={['sm', '2xl', '3xl']} textAlign='center'>
+              Responda as questões objetivamente com o grau de certeza que você possui sobre as questões descritas abaixo, sendo
+              <strong> 1 ponto (absolutamente não concordo) e 5 pontos (absolutamente concordo).</strong>
             </Text>
             <Flex justify='center' direction='column'>
               {questionnaire.questions.map((question, index) => (
@@ -154,7 +154,6 @@ export function Questions() {
           }
         </Box >
         :
-        // faça um timer de 5 segundos para mostrar o resultado
         <Box p='2' mx={[4, 8]} >
           <Flex direction='column' justify='center' align='center' h='85vh'>
             <Heading size='lg' textAlign='center'>

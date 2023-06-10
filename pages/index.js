@@ -22,7 +22,7 @@ export default function Home() {
               <GridItem rowSpan={1} colSpan={1}>
                 <Card p='3' justifyContent='center' h='100%'>
                   <Flex alignItems='center' flexDirection={['column', 'row']} gap='5'>
-                    <Flex><QuestionIcon fontSize='6xl' color='orange.500' /></Flex>
+                    <Flex><QuestionIcon fontSize='6xl' color='teal.300' /></Flex>
                     <Text fontSize='2xl' textAlign='center' mt='3'>O teste consiste em 15 perguntas</Text>
                   </Flex>
                 </Card>
@@ -30,7 +30,7 @@ export default function Home() {
               <GridItem rowSpan={1} colSpan={1}>
                 <Card p='3' justifyContent='center'>
                   <Flex alignItems='center' flexDirection={['column', 'row']} gap='5'>
-                    <Flex justify='center'><CheckIcon fontSize='6xl' color='blue.500'/></Flex>
+                    <Flex justify='center'><CheckIcon fontSize='6xl' color='teal.300'/></Flex>
                     <Text fontSize='2xl' textAlign='center' mt='3'>Você deve responder as perguntas em uma escala de 1 a 5 na escala likert</Text>
                   </Flex>
                 </Card>
@@ -38,7 +38,7 @@ export default function Home() {
               <GridItem rowSpan={1} colSpan={1}>
                 <Card p='3' justifyContent='center'>
                   <Flex alignItems='center' flexDirection={['column', 'row']} gap='5'>
-                    <Flex justify='center'><StarIcon fontSize='6xl' color='green.500'/></Flex>
+                    <Flex justify='center'><StarIcon fontSize='6xl' color='teal.300'/></Flex>
                     <Text fontSize='2xl' textAlign='center' mt='3'>Ao final, você terá resultados enquanto a sua resiliência no esporte</Text>
                   </Flex>
                 </Card>
