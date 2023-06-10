@@ -16,7 +16,7 @@ Este projeto faz parte do meu TCC (Trabalho de Conclusão de Curso) e tem como o
 O principal objetivo deste projeto é desenvolver um sistema web para coleta e análise de dados relacionados à resiliência no esporte. Com base no estudo mencionado acima, um conjunto predefinido de parâmetros forma um questionário que, ao ser concluído, classifica o nível de resiliência do usuário.
 
 
-## Deplou da aplicação
+## Deploy da aplicação
 
 A aplicação está disponível em: [https://rs-sp.vercel.app/]
 
