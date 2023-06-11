@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { db } from '../lib/firebase';
 import { collection, getDocs, query, setDoc, doc } from 'firebase/firestore';
 import { Flex, Modal, ModalBody, ModalCloseButton, ModalContent, Heading, ModalOverlay, Button, 
-         FormControl, Input, FormLabel, Text, Box, Card, Switch, Divider, Grid, GridItem, Spacer, Stack } from '@chakra-ui/react';
+         FormControl, Input, FormLabel, Text, Box, Switch, Divider } from '@chakra-ui/react';
 import Head from 'next/head';
 import Question from '../components/Question';
 import { useRouter } from 'next/router';
@@ -129,12 +129,14 @@ export function Questions() {
         !result ?
         <Box p='2' mx={[4, 8]} >
           {questionnaires.map((questionnaire) => (
-          <Box key={'questionnaire-' + questionnaire.id} display='flex' flexDirection={'column'} h='85vh' justifyContent='space-between'>
-            <Text fontSize={['xl','4xl']} textAlign='center' textTransform='uppercase'>{questionnaire.name}</Text>
-            <Text px={['5', '10']} fontSize={['sm', '2xl', '3xl']} textAlign='center'>
-              Responda as questões objetivamente com o grau de certeza que você possui sobre as questões descritas abaixo, sendo
-              <strong> 1 ponto (absolutamente não concordo) e 5 pontos (absolutamente concordo).</strong>
-            </Text>
+          <Box key={'questionnaire-' + questionnaire.id} display='flex' flexDirection={'column'} minH='85vh' justifyContent='space-between'>
+            <Box mt='2' minH='40vh' display='flex' flexDirection='column' justifyContent='space-betwwen'>
+              <Text fontSize={['2xl','5xl']} textAlign='center' fontWeight='bold' color='teal.500' textTransform='uppercase'>{questionnaire.name}</Text>
+              <Text px={['5', '10']} fontSize={['lg', '2xl', '3xl']} textAlign='center'>
+                Responda as questões objetivamente com o grau de certeza que você possui sobre as questões descritas abaixo, sendo
+                <strong> 1 ponto (absolutamente não concordo) e 5 pontos (absolutamente concordo).</strong>
+              </Text>
+            </Box> 
             <Flex justify='center' direction='column'>
               {questionnaire.questions.map((question, index) => (
                 <Question 

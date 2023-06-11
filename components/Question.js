@@ -1,6 +1,5 @@
-import { Card, Flex, Text } from '@chakra-ui/react'
+import { Card, Flex, Text,  useRadioGroup, Box, Button, Spacer } from '@chakra-ui/react'
 import { ArrowBackIcon, ArrowForwardIcon } from '@chakra-ui/icons';
-import { useRadioGroup, Box, Button, Spacer } from '@chakra-ui/react'
 import RadioCard from '../components/RadioCard';
 import React, {useState} from 'react'
 
@@ -15,10 +14,10 @@ export default function Question(props) {
   const options = ['1', '2', '3', '4', '5']
 
   return (
-    <Flex justify='center' key={'questionnaire-' + props.questionnaire.id + 'question-' + props.index} className={props.currentQuestion != props.index ? 'd-none' : ''} h='50vh'>
-      <Card m='3' p={['4','10']} w={['95vw', '80vw']} justifyContent='center'>
+    <Flex justify='center' key={'questionnaire-' + props.questionnaire.id + 'question-' + props.index} className={props.currentQuestion != props.index ? 'd-none' : ''} minH={['50vh', '']}>
+      <Card m='3' p={['8','10']} w={['95vw', '80vw']} justifyContent='center' h='100%'>
       <Flex direction='column' align='between' alignItems='center' gap='5'>
-        <Text fontSize={['md', '2xl']} textAlign='center'> {props.index + 1}. {props.question.question}</Text> 
+        <Text fontSize={['xl', '2xl']} textAlign='center'> {props.index + 1}. {props.question.question}</Text> 
         <Flex justify='center' w='100%'>
           <Flex gap='2'>
             {options.map((value) => {
@@ -31,7 +30,7 @@ export default function Question(props) {
             })}
           </Flex>
         </Flex>
-        <Box w={['100%', '85%']}> 
+        <Box minW={['100%', '85%']}> 
           <Flex mt='10'>
             <Button colorScheme='teal' isDisabled={props.index === 0 ? true : false} onClick={()=>{props.setCurrentQuestion(props.index-1);}}><ArrowBackIcon/>Anterior</Button>
             <Spacer />
