@@ -3,7 +3,7 @@ import withAuthModal from '../components/Auth';
 import Layout from '../components/Layout';
 import React, { useEffect, useState } from 'react';
 import { db } from '../lib/firebase';
-import { collection, getDocs, query, setDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, query, setDoc, doc, getDoc } from 'firebase/firestore';
 import { Flex, Modal, ModalBody, ModalCloseButton, ModalContent, Heading, ModalOverlay, Button, 
          FormControl, Input, FormLabel, Text, Box, Switch, Divider } from '@chakra-ui/react';
 import Head from 'next/head';
@@ -70,7 +70,6 @@ export function Questions() {
             questionnairesData.push(questionnaire);
           }
         }
-    
         setQuestionnaires(questionnairesData);
       } catch (error) {
         console.error('Erro ao buscar questionários:', error);
@@ -97,30 +96,55 @@ export function Questions() {
   }, []);
 
   const appendOption = (value, index) => {
-    const answerIndex = answers.findIndex((answer) => answer.question === index+1);
-    if (answerIndex === -1) {
-      setAnswers([...answers, {question: index+1, answer: value}]);
+    const questionExists = answers.find((answer) => answer.question === currentQuestion + 1);
+    if (!questionExists) {
+      setAnswers([...answers, {question: currentQuestion, answer: value}]);
     } else {
       const newAnswers = [...answers];
-      newAnswers[answerIndex].answer = value;
+      newAnswers[currentQuestion].answer = value;
       setAnswers(newAnswers);
     }
   }
 
   const redirectResult = () => {
+    async function saveAnswers() {
+      try {
+        const userRef = doc(db, 'users', user?.uid);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+          const answersRef = collection(db, 'users', user?.uid, 'answers');
+          const answersQuerySnapshot = await getDocs(answersRef);
+          if (answersQuerySnapshot.empty) {
+            const data = answers.reduce((acc, answer) => {
+              const fieldName = `question_${answer.question+1}`;
+              return {
+                ...acc,
+                [fieldName]: answer.answer,
+              };
+            }, {});
+            data.created_at = new Date();
+            const docRef = doc(answersRef);
+            await setDoc(docRef, data);
+          }
+        }
+      } catch (error) {
+        console.error('Erro ao salvar respostas:', error);
+      }
+    }
+    saveAnswers();
     router.push('/profile')
   }
 
   return (
     <>
     <Layout>
-      <Head>
+        <Head>
           <script
               dangerouslySetInnerHTML={{
                 __html: `
-                if(!document.cookie || !document.cookie.includes('rs-sp')) {
-                  window.location.href = "/"
-                }
+                  if(!document.cookie || !document.cookie.includes('rs-sp')) {
+                    window.location.href = "/"
+                  }
                 `
               }}
           />
@@ -130,7 +154,7 @@ export function Questions() {
         <Box p='2' mx={[4, 8]} >
           {questionnaires.map((questionnaire) => (
           <Box key={'questionnaire-' + questionnaire.id} display='flex' flexDirection={'column'} minH='85vh' justifyContent='space-between'>
-            <Box mt='2' minH='40vh' display='flex' flexDirection='column' justifyContent='space-betwwen'>
+            <Box mt='2' minH='30vh' display='flex' flexDirection='column' justifyContent='space-betwwen'>
               <Text fontSize={['2xl','5xl']} textAlign='center' fontWeight='bold' color='teal.500' textTransform='uppercase'>{questionnaire.name}</Text>
               <Text px={['5', '10']} fontSize={['lg', '2xl', '3xl']} textAlign='center'>
                 Responda as questões objetivamente com o grau de certeza que você possui sobre as questões descritas abaixo, sendo
@@ -174,15 +198,11 @@ export function Questions() {
         <ModalCloseButton />
         <ModalBody>
           <Flex direction='column' justify='center' gap={4}>
-            <Heading size='lg' textAlign='center'>
+            <Heading size='md' textAlign='center'>
               Seja bem vindo!
             </Heading>
             <FormControl>
               <Text textAlign='start'>Olá {user?.name}, gostariámos de te conhecer um pouco melhor. Por favor, preencha os campos abaixo:</Text>
-            </FormControl>
-            <FormControl>
-              <FormLabel>Nome Completo</FormLabel>
-              <Input placeholder='e.g. João da Silva' />
             </FormControl>
             <FormControl>
               <FormLabel>Data de nascimento</FormLabel>
@@ -194,7 +214,6 @@ export function Questions() {
               </FormLabel>
               <Switch id='email-alerts' />
             </FormControl>
-            <Divider />
             <Button onClick={handleConfirm} mt={4} colorScheme='whatsapp'>
               Confirmar
             </Button>
