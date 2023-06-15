@@ -36,7 +36,7 @@ export default function Question(props) {
             <Spacer />
             <Button colorScheme='teal' isDisabled={!next} onClick={()=>{
               props.setCurrentQuestion(props.index+1)
-              if(props.index+1 === props.questionnaire.questions.length){
+              if(props.index+1 === 1){
                 props.setResult(true)
               }
             }}

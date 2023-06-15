@@ -123,8 +123,11 @@ export function Questions() {
               };
             }, {});
             data.created_at = new Date();
+            data.questionnaire = questionnaires[0].id;
             const docRef = doc(answersRef);
             await setDoc(docRef, data);
+          }else{
+            alert('Você já respondeu esse questionário!')
           }
         }
       } catch (error) {
