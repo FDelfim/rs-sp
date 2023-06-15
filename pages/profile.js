@@ -1,4 +1,4 @@
-import { Flex, Text, Avatar, Box, Divider } from '@chakra-ui/react';
+import { Flex, Text, Avatar, Box, Divider, Alert, AlertIcon } from '@chakra-ui/react';
 import Layout from '../components/Layout';
 import useAuth  from '../hooks/useAuth';
 import { useEffect, useState } from 'react';
@@ -44,6 +44,7 @@ export default function Profile(){
     }
 
     getAnswers();
+    console.log(answers)
 
   }, [user])
 
@@ -61,11 +62,23 @@ export default function Profile(){
             </Flex>
             <Divider orientation='vertical'/>
           </Flex>
-          <Flex flexDirection='column' p={['2','4']}>
-            <Text fontSize={['xl', '2xl']} fontWeight='500' mt='4' textAlign={['center', 'start']} m='0'><strong>Último questionário respondido</strong></Text>
-            <Text textAlign={['center', 'start']} fontSize={['md','xl']}>{ lastQuestionnaire }</Text>
-            <Text fontSize={['xl', '2xl']} fontWeight='500' mt='4' textAlign={['center', 'start']} m='0'><strong>Data da útima resposta</strong></Text>
-            <Text textAlign={['center', 'start']} fontSize={['md','xl']}>{data2br(Date(answers[0]?.created_at))}</Text>
+          <Flex flexDirection='column' p={['2','4']} w='100%' h='100%'>
+            {
+              answers.length > 0 ?
+              <Box>
+                <Text fontSize={['xl', '2xl']} fontWeight='500' mt='4' textAlign={['center', 'start']} m='0'><strong>Último questionário respondido</strong></Text>
+                <Text textAlign={['center', 'start']} fontSize={['md','xl']}>{ lastQuestionnaire }</Text>
+                <Text fontSize={['xl', '2xl']} fontWeight='500' mt='4' textAlign={['center', 'start']} m='0'><strong>Data da útima resposta</strong></Text>
+                <Text textAlign={['center', 'start']} fontSize={['md','xl']}>{data2br(Date(answers[0]?.created_at))}</Text>
+              </Box>              
+              :
+              <Box flexDirection='row' justifyContent='center' alignContent='center' w='100%' my='5'>
+                <Alert variant='left-accent' height='125px' flexDirection='column' justifyContent='center' alignContent='center' gap='2'>
+                  <AlertIcon boxSize='40px'/>
+                  <Text textAlign='center'>Você ainda não respondeu nenhum questionário</Text>
+                </Alert>
+              </Box>
+            }
           </Flex>
         </Flex>
       </Layout>
