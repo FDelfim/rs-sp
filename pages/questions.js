@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { db } from '../lib/firebase';
 import { collection, getDocs, query, setDoc, doc, getDoc } from 'firebase/firestore';
 import { Flex, Modal, ModalBody, ModalCloseButton, ModalContent, Heading, ModalOverlay, Button, 
-         FormControl, Input, FormLabel, Text, Box, Switch, Divider } from '@chakra-ui/react';
+         FormControl, Input, FormLabel, Text, Box, NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper } from '@chakra-ui/react';
 import Head from 'next/head';
 import Question from '../components/Question';
 import { useRouter } from 'next/router';
@@ -16,6 +16,7 @@ export function Questions() {
   const [questionnaires, setQuestionnaires] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState([]);
+  const [ userInfo, setUserInfo ] = useState({birthDate: '', birthCity: '', modality: '', timePratice: '', competitiveLevel: ''});
   const [result, setResult] = useState(false);
 
   const [show, setShow] = useState(false);
@@ -40,6 +41,7 @@ export function Questions() {
         await setDoc(doc(db, 'users', `${user?.uid}`), {
           name: user?.name,
           email: user?.email,
+          
         });
       } else {
         return (
@@ -198,7 +200,6 @@ export function Questions() {
     <Modal isOpen={show} onClose={handleClose} size='xl' >
       <ModalOverlay />
       <ModalContent p='3'>
-        <ModalCloseButton />
         <ModalBody>
           <Flex direction='column' justify='center' gap={4}>
             <Heading size='md' textAlign='center'>
@@ -207,16 +208,83 @@ export function Questions() {
             <FormControl>
               <Text textAlign='start'>Olá {user?.name}, gostariámos de te conhecer um pouco melhor. Por favor, preencha os campos abaixo:</Text>
             </FormControl>
-            <FormControl>
+            <FormControl isRequired>
+              <FormLabel>Local de nascimento</FormLabel>
+              <Input type='text' placeholder='e.g. São Paulo' onChange={(event) => {setUserInfo({
+                    ...userInfo,
+                    birthCity: event.target.value
+                  })
+                }}
+              />
+            </FormControl>
+            <FormControl isRequired>
               <FormLabel>Data de nascimento</FormLabel>
-              <Input type='date' placeholder='e.g. João da Silva' />
+              <Input type='date' onChange={(event) => {setUserInfo({
+                    ...userInfo,
+                    birthDate: event.target.value
+                  })
+                }} 
+              />
             </FormControl>
-            <FormControl display='flex' alignItems='center'>
-              <FormLabel htmlFor='email-alerts' mb='0'>
-                Você é atleta de alto rendimento?
+            <FormControl alignItems='center'>
+              <FormLabel>
+                Você é atleta?
               </FormLabel>
-              <Switch id='email-alerts' />
+              <Flex gap='3'>
+                <Button colorScheme='teal' size='sm' variant={userInfo.athlete == true ? 'solid' : 'outline'} onClick={() => { setUserInfo({...userInfo, athlete: true}) }} >Sim</Button>
+                <Button colorScheme='teal' size='sm' variant={userInfo.athlete == false ? 'solid' : 'outline'} onClick={() => { setUserInfo({...userInfo, athlete: false}) }} >Não</Button>
+              </Flex>
             </FormControl>
+            {
+              (userInfo.athlete !== undefined ? 
+                userInfo.athlete === true ? 
+                <>
+                  <FormControl isRequired>
+                    <FormLabel>Qual modalidade?</FormLabel>
+                    <Input type='text' placeholder='e.g. Atletismo' onChange={(event) => {setUserInfo({
+                          ...userInfo,
+                          sport: event.target.value
+                        })
+                      }}
+                    />
+                  </FormControl>
+                  <FormControl isRequired>
+                    <FormLabel>Há Quanto Tempo você pratica esta modalidade? (em anos)</FormLabel>
+                    <NumberInput step={1} defaultValue={0} min={0}>
+                      <NumberInputField onChange={(event) => {setUserInfo({
+                            ...userInfo,
+                            sportTime: event.target.value
+                          })
+                        }}
+                      />
+                      <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                      </NumberInputStepper>
+                    </NumberInput>
+                  </FormControl>
+                  <FormControl>
+                    <FormLabel></FormLabel>
+                    <NumberInput max={50} min={10}>
+                      <NumberInputField />
+                      <NumberInputStepper>
+                        <NumberIncrementStepper />
+                        <NumberDecrementStepper />
+                      </NumberInputStepper>
+                    </NumberInput>
+                  </FormControl>
+                </>
+                :
+                  <FormControl isRequired>
+                    <FormLabel>Pratica algum esporte amador?</FormLabel>
+                    <Flex gap='3'>
+                      <Button colorScheme='teal' size='sm' variant={userInfo.amateur == true ? 'solid' : 'outline'} onClick={() => { setUserInfo({...userInfo, amateur: true}) }} >Sim</Button>
+                      <Button colorScheme='teal' size='sm' variant={userInfo.amateur == false ? 'solid' : 'outline'} onClick={() => { setUserInfo({...userInfo, amateur: false}) }} >Não</Button>
+                    </Flex>
+                  </FormControl>
+              :
+              <></>)
+            }
             <Button onClick={handleConfirm} mt={4} colorScheme='whatsapp'>
               Confirmar
             </Button>

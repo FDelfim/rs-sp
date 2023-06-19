@@ -53,11 +53,11 @@ export default function Profile(){
       <Layout>
         <Flex mx={['4', '40']} mt={['4', '10']} flexDirection={['column', 'row']}>
           <Flex>
-            <Flex align='start' flexDirection={['row', 'column']} gap='4' p='3' minW={['','20vw']} minH={['','80vh']} me={['','5']}>
+            <Flex align='center' flexDirection={['row', 'column']} gap='4' p='3' minW={['','20vw']} minH={['','80vh']} me={['','5']}>
               <Avatar size='2xl' name={user?.name} src={user?.photoUrl} />
-              <Flex flexDirection='column'> 
-                <Text fontSize={['2xl', '4xl']} p='0' m='0' fontWeight='500'>{user?.name}</Text>
-                <Text fontSize={['md', 'md']} fontWeight='500'>Data de nascimento: 00/00/0000</Text>
+              <Flex flexDirection='column' > 
+                <Text fontSize={['2xl', '4xl']} p='0' m='0' fontWeight='500' textAlign='center'>{user?.name}</Text>
+                <Text fontSize={['md', 'md']} fontWeight='500' textAlign='center'>Data de nascimento: 00/00/0000</Text>
               </Flex>
             </Flex>
             <Divider orientation='vertical'/>
