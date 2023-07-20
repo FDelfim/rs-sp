@@ -2,11 +2,14 @@ import { useColorModeValue, Card, Box, Flex } from '@chakra-ui/react';
 import dynamic from 'next/dynamic';
 const ApexCharts = dynamic(() => import('react-apexcharts'), { ssr: false });
 
-export default function RadarChart() {
+export default function RadarChart(props) {
+  
+  const valores  = props.series ?? [0,0,0,0,0]
+
   const colorMode = useColorModeValue('light', 'dark');
   const labelColor = colorMode === 'light' ? '#263238' : '#ffffff';
-  const primaryRadarColor = colorMode === 'light' ? '#e9e9e9' : '#1a202c';
-  const secondaryRadarColor = colorMode === 'light' ? '#ffffff' : '#2d3748';
+  const primaryRadarColor = colorMode === 'light' ? '#e9e9e9' : '#2d3748';
+  const secondaryRadarColor = colorMode === 'light' ? '#ffffff' : '#5e6572';
 
   const options = {
     plotOptions: {
@@ -79,7 +82,7 @@ export default function RadarChart() {
   }
 
   const series = [{
-    data: [13, 10, 12, 14, 12]
+    data: valores,
   }]
 
   return (

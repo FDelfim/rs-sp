@@ -23,9 +23,8 @@ export default function RadioCard(props) {
         _focus={{
           boxShadow: 'outline',
         }}
-        px={['4', '6' ,'10']}
-        py={['3', '4' ,'6']}
-        onClick={() => {props.setNext(true)}}
+        px={props.x}
+        py={props.y}
       >
         {props.children}
       </Box>

@@ -3,6 +3,8 @@ import { QuestionIcon, CheckIcon, StarIcon, ArrowForwardIcon, ChatIcon } from '@
 import useAuth from '../hooks/useAuth';
 import Layout from '../components/Layout';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import  Footer from '../components/Footer';
 
 export default function Home() {
 
@@ -11,6 +13,7 @@ export default function Home() {
   const bgColor = useColorModeValue('#F7F7F7', '#1A202C');
 
   return (
+    <>
     <Layout>
       <Box bgColor={bgColor}>
         <Flex justifyContent='center' alignItems='center'>
@@ -66,5 +69,7 @@ export default function Home() {
         </Flex>
       </Box>
     </Layout>
+      <Footer/>
+    </>
   )
 };
