@@ -2,54 +2,29 @@ import useAuth from '../hooks/useAuth';
 import withAuthModal from '../components/Auth';
 import Layout from '../components/Layout';
 import React, { useEffect, useState } from 'react';
-import { db } from '../lib/firebase';
-import { collection, getDocs, query, setDoc, doc, getDoc } from 'firebase/firestore';
-import { Flex, Modal, ModalBody, ModalCloseButton, ModalContent, Heading, ModalOverlay, Button, 
-         FormControl, Input, FormLabel, Text, Box, Switch, Divider } from '@chakra-ui/react';
 import Head from 'next/head';
 import Question from '../components/Question';
+import WelcomeModal from '../components/_modals/welcomeModal';
+import { db } from '../lib/firebase';
+import { collection, getDocs, query, setDoc, doc, getDoc } from 'firebase/firestore';
+import { Flex, Heading, Button, Text, Box, useToast, Slide, useDisclosure} from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 
 export function Questions() {
 
   const { user } = useAuth();
+
+  const toast = useToast();
+
   const [questionnaires, setQuestionnaires] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState([]);
   const [result, setResult] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
-  const [show, setShow] = useState(false);
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  const {isOpen : info, onToggle : onInfo} = useDisclosure(); 
 
   const router = useRouter();
-
-  const handleConfirm = async (e) => {
-    e.preventDefault();
-    try {
-      const userRef = collection(db, 'users');
-      const querySnapshot = await getDocs(userRef);
-      const usersData = [];
-      for (const doc of querySnapshot.docs) {
-        const user = doc.data();
-        user.uid = doc.id;
-        usersData.push(user);
-      }
-      const userExists = usersData.find((user) => user.id === user?.uid);
-      if (!userExists) {
-        await setDoc(doc(db, 'users', `${user?.uid}`), {
-          name: user?.name,
-          email: user?.email,
-        });
-      } else {
-        return (
-          alert('Usuário cadastrado!')
-        )
-      }
-    } catch (error) {
-      console.error('Erro ao cadastar usuário:', error);
-    }
-  }
 
   useEffect(() => {
     const fetchQuestionnaires = async () => {
@@ -57,7 +32,6 @@ export function Questions() {
         const questionnairesRef = collection(db, 'questionnaires');
         const querySnapshot = await getDocs(questionnairesRef);
         const questionnairesData = [];
-      
         for (const doc of querySnapshot.docs) {
           const questionnaire = doc.data();
           questionnaire.id = doc.id;
@@ -72,39 +46,54 @@ export function Questions() {
         }
         setQuestionnaires(questionnairesData);
       } catch (error) {
-        console.error('Erro ao buscar questionários:', error);
+        toast({
+          title: 'Erro ao buscar questionários',
+          description: 'Não foi possível buscar os questionários',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        })
       }
     };
 
-    const infouser = async () => {
+    const fetchUserInfo = async () => {
       try {
         const userRef = collection(db, 'users');
         const querySnapshot = await getDocs(userRef);
-        const userExists = querySnapshot.docs.find((doc) => doc.id === user?.uid);
-        if (!userExists) {
-          console.log('Usuário não cadastrado!');
-          return (
-            handleShow()
-          )
+        const doc = querySnapshot.docs.find((doc) => doc.id === user?.uid);
+        if (!doc) {
+          setIsOpen(true);
+        } else {
+          setIsOpen(false);
         }
       } catch (error) {
         console.error('Erro ao buscar usuários:', error);
       }
-    }
-    infouser();
+    };
+
+    fetchUserInfo().catch((error) => {
+      toast({
+        title: 'Erro ao buscar usuário',
+        description: 'Não foi possível buscar as informações do usuário',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+      })
+    });
+
     fetchQuestionnaires();
-  }, []);
+  }, [user]);
 
   const appendOption = (value, index) => {
     const questionExists = answers.find((answer) => answer.question === currentQuestion + 1);
     if (!questionExists) {
-      setAnswers([...answers, {question: currentQuestion, answer: value}]);
+      setAnswers([...answers, { question: currentQuestion, answer: value }]);
     } else {
       const newAnswers = [...answers];
       newAnswers[currentQuestion].answer = value;
       setAnswers(newAnswers);
     }
-  }
+  };
 
   const redirectResult = () => {
     async function saveAnswers() {
@@ -116,7 +105,7 @@ export function Questions() {
           const answersQuerySnapshot = await getDocs(answersRef);
           if (answersQuerySnapshot.empty) {
             const data = answers.reduce((acc, answer) => {
-              const fieldName = `question_${answer.question+1}`;
+              const fieldName = `question_${answer.question + 1}`;
               return {
                 ...acc,
                 [fieldName]: answer.answer,
@@ -125,31 +114,39 @@ export function Questions() {
             data.created_at = new Date();
             data.questionnaire = questionnaires[0].id;
             const docRef = doc(answersRef);
+            console.log(data)
             await setDoc(docRef, data);
-          }else{
-            alert('Você já respondeu esse questionário!')
+          } else {
+            
           }
         }
       } catch (error) {
-        console.error('Erro ao salvar respostas:', error);
+        console.log(error)
+        toast({
+          title: 'Erro ao salvar respostas',
+          description: 'Não foi possível salvar as respostas',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        })
       }
     }
     saveAnswers();
-    router.push('/profile')
-  }
+    router.push('/profile');
+  };
 
   return (
     <>
-    <Layout>
+      <Layout>
         <Head>
           <script
-              dangerouslySetInnerHTML={{
-                __html: `
+            dangerouslySetInnerHTML={{
+              __html: `
                   if(!document.cookie || !document.cookie.includes('rs-sp')) {
                     window.location.href = "/"
                   }
                 `
-              }}
+            }}
           />
         </Head>
       {
@@ -159,10 +156,18 @@ export function Questions() {
           <Box key={'questionnaire-' + questionnaire.id} display='flex' flexDirection={'column'} minH='85vh' justifyContent='space-between'>
             <Box mt='2' minH='30vh' display='flex' flexDirection='column' justifyContent='space-betwwen'>
               <Text fontSize={['2xl','5xl']} textAlign='center' fontWeight='bold' color='teal.500' textTransform='uppercase'>{questionnaire.name}</Text>
-              <Text px={['5', '10']} fontSize={['lg', '2xl', '3xl']} textAlign='center'>
+              <Text px={['5', '10']} fontSize={['lg', '2xl', '2xl']} textAlign='center'>
                 Responda as questões objetivamente com o grau de certeza que você possui sobre as questões descritas abaixo, sendo
                 <strong> 1 ponto (absolutamente não concordo) e 5 pontos (absolutamente concordo).</strong>
               </Text>
+              <Box display='flex' justifyContent='center'>
+                <Button colorScheme='teal' onClick={onInfo}>{ info ? 'Esconder' : 'Clique aqui para mais informações!'}</Button>
+              </Box> 
+              <Slide direction='bottom' in={info} style={{ zIndex: 10 }}>
+                <Box p='4' color='white' mt='4' bg='teal' shadow='md' textAlign='center'>
+                  1: absolutamente não concordo, 2: não concordo, 3: indiferente, 4: concordo, e 5: absolutamente eu concordo
+                </Box>
+              </Slide>
             </Box> 
             <Flex justify='center' direction='column'>
               {questionnaire.questions.map((question, index) => (
@@ -189,41 +194,12 @@ export function Questions() {
               Obrigado por responder o questionário!
             </Heading>
             <Text textAlign='center'>Agora que você já respondeu o questionário, clique no botão abaixo para ver o resultado.</Text>
-            <Button onClick={redirectResult} colorScheme='teal'>Ver resultado</Button>
-          </Flex>
-        </Box>
-      }
-    </Layout >
-    {/* MODAL SECTION */}
-    <Modal isOpen={show} onClose={handleClose} size='xl' >
-      <ModalOverlay />
-      <ModalContent p='3'>
-        <ModalCloseButton />
-        <ModalBody>
-          <Flex direction='column' justify='center' gap={4}>
-            <Heading size='md' textAlign='center'>
-              Seja bem vindo!
-            </Heading>
-            <FormControl>
-              <Text textAlign='start'>Olá {user?.name}, gostariámos de te conhecer um pouco melhor. Por favor, preencha os campos abaixo:</Text>
-            </FormControl>
-            <FormControl>
-              <FormLabel>Data de nascimento</FormLabel>
-              <Input type='date' placeholder='e.g. João da Silva' />
-            </FormControl>
-            <FormControl display='flex' alignItems='center'>
-              <FormLabel htmlFor='email-alerts' mb='0'>
-                Você é atleta de alto rendimento?
-              </FormLabel>
-              <Switch id='email-alerts' />
-            </FormControl>
-            <Button onClick={handleConfirm} mt={4} colorScheme='whatsapp'>
-              Confirmar
-            </Button>
-          </Flex>
-        </ModalBody>
-      </ModalContent>
-    </Modal>
+              <Button onClick={redirectResult} colorScheme='teal'>Ver resultado</Button>
+            </Flex>
+          </Box>
+        }
+      <WelcomeModal isOpen={isOpen} setIsOpen={setIsOpen} />
+      </Layout>
     </>
   );
 }

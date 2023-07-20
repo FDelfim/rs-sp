@@ -7,7 +7,10 @@ export default function Question(props) {
 
   const {getRadioProps} = useRadioGroup({
     name: props.index,
-    onChange: props.appendOption,
+    onChange: (e) => {
+      props.appendOption(e);
+      setNext(true);
+    },
   }) 
 
   const [next, setNext] = useState(false)
@@ -23,8 +26,8 @@ export default function Question(props) {
             {options.map((value) => {
               const radio = getRadioProps({ value })
               return (
-                <RadioCard key={value} {...radio} setNext={setNext}>
-                  <Text p='0' m='0' fontSize={['', 'xl']}>{value}</Text>
+                <RadioCard key={value} {...radio} x='4' y='3' setNext={setNext}>
+                  <Text p='0' m='0' fontSize={['', '3xl']}>{value}</Text>
                 </RadioCard>
               )
             })}
