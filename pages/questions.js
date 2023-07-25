@@ -9,6 +9,7 @@ import { db } from '../lib/firebase';
 import { collection, getDocs, query, setDoc, doc, getDoc } from 'firebase/firestore';
 import { Flex, Heading, Button, Text, Box, useToast, Slide, useDisclosure} from '@chakra-ui/react';
 import { useRouter } from 'next/router';
+import { getUserInfo } from '../services/userServices';
 
 export function Questions() {
 
@@ -56,30 +57,21 @@ export function Questions() {
       }
     };
 
-    const fetchUserInfo = async () => {
-      try {
-        const userRef = collection(db, 'users');
-        const querySnapshot = await getDocs(userRef);
-        const doc = querySnapshot.docs.find((doc) => doc.id === user?.uid);
-        if (!doc) {
-          setIsOpen(true);
-        } else {
-          setIsOpen(false);
-        }
-      } catch (error) {
-        console.error('Erro ao buscar usuários:', error);
+    getUserInfo(user).then((userData) => {
+      if (userData) {
+        setIsOpen(false);
+      } else {
+        setIsOpen(true);
       }
-    };
-
-    fetchUserInfo().catch((error) => {
+    }).catch((error) => {
       toast({
         title: 'Erro ao buscar usuário',
-        description: 'Não foi possível buscar as informações do usuário',
+        description: 'Não foi possível buscar o usuário',
         status: 'error',
         duration: 5000,
         isClosable: true,
       })
-    });
+    })
 
     fetchQuestionnaires();
   }, [user]);

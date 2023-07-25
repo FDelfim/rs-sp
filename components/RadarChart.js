@@ -8,7 +8,7 @@ export default function RadarChart(props) {
 
   const colorMode = useColorModeValue('light', 'dark');
   const labelColor = colorMode === 'light' ? '#263238' : '#ffffff';
-  const primaryRadarColor = colorMode === 'light' ? '#e9e9e9' : '#2d3748';
+  const primaryRadarColor = colorMode === 'light' ? '#e9e9e9' : '#999999';
   const secondaryRadarColor = colorMode === 'light' ? '#ffffff' : '#5e6572';
 
   const options = {
@@ -51,7 +51,7 @@ export default function RadarChart(props) {
     },
     stroke: {
       show: true,
-      width: 2,
+      width: 4,
       colors: ['#319795']
     },
     markers: {
@@ -62,7 +62,7 @@ export default function RadarChart(props) {
     dataLabels: {
       enabled: true,
       background: {
-        borderRadius: 2,
+        borderRadius: 3,
       },
       style: {
         colors: ['#319795'],
@@ -70,11 +70,11 @@ export default function RadarChart(props) {
     },
     responsive: [
       {
-        breakpoint: 768,
+        breakpoint: 500,
         options: {
           chart: {
             width: '100%',
-            height: 350,
+            height: 300,
           },
         },
       },
@@ -86,11 +86,13 @@ export default function RadarChart(props) {
   }]
 
   return (
+    <Box w='100%' p='0' m='0'>
       <ApexCharts
-        name='Radar chart'
+        name='Resiliência no Esporte'
         options={options}
         series={series}
         type="radar"
       />
+    </Box>
   );
 }

@@ -1,9 +1,12 @@
 import Link from 'next/link';
-import { Flex, Icon, useColorMode, useColorModeValue, Button, Avatar, Menu, MenuButton, MenuList, MenuItem, Heading } from '@chakra-ui/react';
-import { MoonIcon, SunIcon } from '@chakra-ui/icons';
+import { Flex, Icon, useColorMode, useColorModeValue, Button, Avatar, Divider,
+  Menu, MenuButton, MenuList, MenuItem, Heading, useToast } from '@chakra-ui/react';
+import { MoonIcon, SunIcon, CheckIcon } from '@chakra-ui/icons';
 import useAuth from '../hooks/useAuth';
 import withAuthModal from './Auth';
 import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { getUserInfo } from './../services/userServices';
 
 export function Nav({ openAuthModal }) {
 
@@ -14,6 +17,15 @@ export function Nav({ openAuthModal }) {
   const bgColor = useColorModeValue('#FFFFFF', '#1A202C');
   const color = useColorModeValue('#1A202C', '#EDEEEE');
   const borderColor = useColorModeValue('#DDD', '#27272A');
+  const [ userInfo, setUserInfo ] = useState({});
+
+  const toast = useToast();
+
+  useEffect(()=>{
+    getUserInfo(user).then((result) => {
+      setUserInfo(result);
+    })
+  }, [user])
 
   return (
     <>
@@ -37,9 +49,11 @@ export function Nav({ openAuthModal }) {
                   src={user.photoUrl}
                   size="sm"
                 />
-                <MenuList>
+                <MenuList w='50%'>
                   <MenuItem onClick={() => router.push('/profile')}>Perfil</MenuItem>
                   <MenuItem onClick={() => signout()}>Sair</MenuItem>
+                  <Divider orientation='horizontal' p='0' m='0'/>
+                  { userInfo?.isSuperUser && <MenuItem textColor='teal' onClick={() => router.push('/answers')}><CheckIcon me='1'/>Respostas</MenuItem> }
                 </MenuList>
               </Menu>
             ) : (

@@ -6,7 +6,7 @@ function Layout({ children }) {
   return (
     <Box bgColor={bgColor} minH='100vh' m='0'>
       <NavBar />
-      <Flex flexDirection='column' w='100%' pt='62px'>
+      <Flex flexDirection='column' w='100%' h='100%' pt='62px'>
         {children}
       </Flex>
     </Box>

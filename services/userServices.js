@@ -1,5 +1,5 @@
 import { db } from '../lib/firebase';
-import { collection, getDocs, doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 const usersCollection = collection(db, 'users');
 
@@ -11,14 +11,14 @@ export const getUser = async (userId) => {
 }
 
 export const getUserAnswers = async (userId) => {
-  const answersRef = collection(db, 'users', `${userId}`, 'answers');
+  const answersRef = collection(doc(usersCollection, userId), 'answers');
   const answersSnapshot = await getDocs(answersRef);
   const answersData = [];
   for (const doc of answersSnapshot.docs) {
     const answer = doc.data();
     answersData.push(answer);
   }
-  return answersData[0];
+  return answersData;
 }
 
 export const storeUser = async (user, uid) => {
@@ -29,4 +29,27 @@ export const storeUser = async (user, uid) => {
 export const updateUser = async (user) => {
   const userRef = doc(usersCollection, `${user.uid}`);
   await updateDoc(userRef, user);
+}
+
+export const getUserInfo = async (user) => {
+  try{
+    const userRef = doc(usersCollection, `${user.uid}`);
+    const userSnap = await getDoc(userRef);
+    const userData = userSnap.data();
+    return userData;
+  } catch (error) {
+    return error;
+  }
+}
+
+export const getAllUsersAnswers = async () => {
+  const usersSnapshot = await getDocs(usersCollection);
+  const usersData = await Promise.all(usersSnapshot.docs.map(async (userDoc) => {
+    const userId = userDoc.id;
+    const answersRef = collection(doc(usersCollection, userId), 'answers');
+    const answersSnapshot = await getDocs(answersRef);
+    const answersData = answersSnapshot.docs.map(answerDoc => answerDoc.data());
+    return { userId, answersData };
+  }));
+  return usersData;
 }

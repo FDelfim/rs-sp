@@ -15,11 +15,13 @@ export function AuthProvider({ children }) {
     if (currentUser) {
       const formatedUser = await formatUser(currentUser);
       setSession(true);
+      setLoading(false);
       setUser(formatedUser);
       return formatedUser;
     }
     setSession(false);
     setUser(false);
+    setLoading(false);
     return false;
   }
 
