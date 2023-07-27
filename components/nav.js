@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Flex, Icon, useColorMode, useColorModeValue, Button, Avatar, Divider,
   Menu, MenuButton, MenuList, MenuItem, Heading, useToast } from '@chakra-ui/react';
-import { MoonIcon, SunIcon, CheckIcon } from '@chakra-ui/icons';
+import { MoonIcon, SunIcon, CheckIcon, SettingsIcon } from '@chakra-ui/icons';
 import useAuth from '../hooks/useAuth';
 import withAuthModal from './Auth';
 import { useRouter } from 'next/router';
@@ -41,21 +41,17 @@ export function Nav({ openAuthModal }) {
           </Flex>
           <Flex justifyContent="center" alignItems="center">
             {user ? (
-              <Menu>
-                <MenuButton
-                  as={Avatar}
-                  mr={6}
-                  name={user.name}
-                  src={user.photoUrl}
-                  size="sm"
-                />
-                <MenuList w='50%'>
-                  <MenuItem onClick={() => router.push('/profile')}>Perfil</MenuItem>
-                  <MenuItem onClick={() => signout()}>Sair</MenuItem>
-                  <Divider orientation='horizontal' p='0' m='0'/>
-                  { userInfo?.isSuperUser && <MenuItem textColor='teal' onClick={() => router.push('/answers')}><CheckIcon me='1'/>Respostas</MenuItem> }
-                </MenuList>
-              </Menu>
+                <>
+                  <Menu>
+                    <MenuButton as={Avatar} mr={6} name={user.name} src={user.photoUrl} size="sm" cursor='pointer'/>
+                    <MenuList>
+                      <MenuItem onClick={() => router.push('/profile')}>Perfil</MenuItem>
+                      <MenuItem onClick={() => signout()}>Sair</MenuItem>
+                      <Divider orientation='horizontal' p='0' m='0'/>
+                      { userInfo?.isSuperUser && <MenuItem textColor='teal' onClick={() => router.push('/answers')}><CheckIcon me='1'/>Área Super Usuário</MenuItem> }
+                    </MenuList>
+                  </Menu>
+                </>
             ) : (
               <Button mr={6} onClick={() => openAuthModal()}>
                 Entrar

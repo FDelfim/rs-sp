@@ -9,6 +9,9 @@ import useAuth from '../hooks/useAuth';
 import { getUser, getUserAnswers } from '../services/userServices';
 import { InfoIcon } from '@chakra-ui/icons';
 import { BsWhatsapp, BsTwitter, BsFacebook, BsTelegram, BsLinkedin, BsShare } from 'react-icons/bs';
+import CryptoJS from 'crypto-js';
+
+const secretKey = process.env.NEXT_PUBLIC_CRYPT_KEY;
 
 export default function Profile() {
 
@@ -170,7 +173,14 @@ export default function Profile() {
                         </Flex>
                         <RadarChart series={series} /> 
                       </GridItem>
-                      <GridItem colSpan={[3, 1]} display='flex' alignItems='end' mb={['0', '10']}>
+                      <GridItem colSpan={[3, 1]} display='flex' flexDirection='column' justifyContent='end' alignItems='center' mb={['0', '10']}>
+                        <Button colorScheme='teal' onClick={() => {
+                          const seriesString = series.join('-');
+                          const userName = userInfo.name;
+                          const text = `userName=${userName}&series=${seriesString}`;
+                          const ciphertext = CryptoJS.AES.encrypt(text, secretKey).toString();
+                          window.location.href = `/result?${ciphertext}`;
+                        }} mb='3' href='/result'>Ver resiliência detalhada</Button>
                         <Box display='flex' flexDirection={['row', 'column']} justifyContent='center' m='0'>
                             <Text fontSize={['md', 'xl']} fontWeight='bold' textAlign='center'>Compartilhar resultado</Text>
                           <Box display='flex'>
