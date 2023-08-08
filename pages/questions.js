@@ -7,9 +7,9 @@ import Question from '../components/Question';
 import WelcomeModal from '../components/_modals/welcomeModal';
 import { db } from '../lib/firebase';
 import { collection, getDocs, query, setDoc, doc, getDoc } from 'firebase/firestore';
-import { Flex, Heading, Button, Text, Box, useToast, Slide, useDisclosure} from '@chakra-ui/react';
+import { Flex, Heading, Button, Text, Box, useToast, Slide, useDisclosure, Spinner} from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import { getUserInfo } from '../services/userServices';
+import { getUserInfo, getUserAnswers } from '../services/userServices';
 
 export function Questions() {
 
@@ -22,6 +22,7 @@ export function Questions() {
   const [answers, setAnswers] = useState([]);
   const [result, setResult] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const {isOpen : info, onToggle : onInfo} = useDisclosure(); 
 
@@ -58,10 +59,28 @@ export function Questions() {
     };
 
     getUserInfo(user).then((userData) => {
-      if (userData) {
-        setIsOpen(false);
-      } else {
+      if (userData && user && user.uid) {
+        if (user.uid) {
+          getUserAnswers(user?.uid).then((answers) => {
+            if (answers.length > 0) {
+              setResult(true);
+              setIsLoading(false);
+            }else{
+              setIsLoading(false);
+            }
+          }).catch((error) => {
+            toast({
+              title: 'Erro ao buscar respostas',
+              description: 'Erro ao buscar respostas do usuário',
+              status: 'error',
+              duration: 5000,
+              isClosable: true,
+            })
+          })
+        }
+      } else if(!userData) {
         setIsOpen(true);
+        setIsLoading(false);
       }
     }).catch((error) => {
       toast({
@@ -72,9 +91,8 @@ export function Questions() {
         isClosable: true,
       })
     })
-
     fetchQuestionnaires();
-  }, [user]);
+  }, [user])
 
   const appendOption = (value, index) => {
     const questionExists = answers.find((answer) => answer.question === currentQuestion + 1);
@@ -85,7 +103,7 @@ export function Questions() {
       newAnswers[currentQuestion].answer = value;
       setAnswers(newAnswers);
     }
-  };
+  }
 
   const redirectResult = () => {
     async function saveAnswers() {
@@ -141,8 +159,12 @@ export function Questions() {
             }}
           />
         </Head>
-      {
-        !result ?
+      { isLoading ? 
+        <Flex h='90vh' justifyContent='center' alignItems='center'>
+          <Spinner size='xl' />
+        </Flex>
+        :
+        (!result ?
         <Box p='2' mx={[4, 8]} >
           {questionnaires.map((questionnaire) => (
           <Box key={'questionnaire-' + questionnaire.id} display='flex' flexDirection={'column'} minH='85vh' justifyContent='space-between'>
@@ -186,10 +208,10 @@ export function Questions() {
               Obrigado por responder o questionário!
             </Heading>
             <Text textAlign='center'>Agora que você já respondeu o questionário, clique no botão abaixo para ver o resultado.</Text>
-              <Button onClick={redirectResult} colorScheme='teal'>Ver resultado</Button>
-            </Flex>
-          </Box>
-        }
+            <Button onClick={redirectResult} colorScheme='teal'>Ver resultado</Button>
+          </Flex>
+        </Box>)
+      }
       <WelcomeModal isOpen={isOpen} setIsOpen={setIsOpen} />
       </Layout>
     </>
