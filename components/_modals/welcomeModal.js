@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import {
-  FormControl, Input, FormLabel, Text, NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper,  NumberDecrementStepper, useRadioGroup,
-   Flex, RadioGroup, Modal, ModalContent, ModalOverlay, ModalBody, ModalCloseButton,  Heading, Divider, Button, useToast } from '@chakra-ui/react';
+  FormControl, Input, FormLabel, Text, NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, useRadioGroup,
+  Flex, RadioGroup, Modal, ModalContent, ModalOverlay, ModalBody, Heading, Divider, Button, useToast, ModalHeader, ModalFooter
+} from '@chakra-ui/react';
 import useAuth from '../../hooks/useAuth';
 import RadioCard from '../RadioCard';
 import { storeUser } from '../../services/userServices';
@@ -10,14 +11,13 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
   const { user } = useAuth();
   const toast = useToast();
 
-  const [userData, setUserData] = useState({
-  });
+  const [userData, setUserData] = useState({});
 
   const { getRadioProps: getAthleteRadioProps } = useRadioGroup({
     name: 'isAthlete',
     onChange: (e) => {
       e === 'Não' ? e = false : e = true;
-      setUserData({ ...userData, isAthlete: e, practicesSport: true });
+      setUserData({ ...userData, isAthlete: e, practicesSport: e });
     },
   });
 
@@ -25,8 +25,7 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
     name: 'practicesSport',
     onChange: (e) => {
       e === 'Não' ? e = false : e = true;
-      var sport = e ? '' : null;
-      setUserData({ ...userData, practicesSport: e,  modality: sport });
+      setUserData({ ...userData, practicesSport: e });
     },
   });
 
@@ -39,9 +38,9 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setUserData({ ...userData, name: user.name, email: user.email, id: user.uid });
     try {
-      await storeUser(userData, user.uid);
+      const updatedUserData = { ...userData, name: user.name, email: user.email, id: user.uid };
+      await storeUser(updatedUserData, user.uid);
       toast({
         title: 'Sucesso!',
         description: 'Seu cadastro foi realizado com sucesso!',
@@ -65,26 +64,26 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
     <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} size="3xl">
       <ModalOverlay />
       <ModalContent>
-        <ModalCloseButton />
-        <ModalBody>
+        <ModalHeader>
           <Heading>Seja bem vindo!</Heading>
-          <Divider />
-          <Text>
-            Olá {user?.name}, gostaríamos de te conhecer um pouco melhor. Por favor, preencha os campos abaixo:
-          </Text>
-          <form onSubmit={handleSubmit}>
+        </ModalHeader>
+        <form onSubmit={handleSubmit}>
+          <ModalBody>
+            <Text>
+              Olá {user?.name}, gostaríamos de te conhecer um pouco melhor. Por favor, preencha os campos abaixo:
+            </Text>
             <FormControl mt="3" isRequired>
               <FormLabel>Naturalidade</FormLabel>
               <Input type="text" placeholder="e.g. Belo Horizonte" onChange={(e) =>
-                  setUserData({ ...userData, birthCity: e.target.value })
-                }
+                setUserData({ ...userData, birthCity: e.target.value })
+              }
               />
             </FormControl>
             <FormControl mt="3" isRequired>
               <FormLabel>Data de nascimento</FormLabel>
               <Input type="date" placeholder="e.g. 01/01/2000" onChange={(e) =>
-               setUserData({ ...userData, birthDate: new Date(e.target.value) })
-                }
+                setUserData({ ...userData, birthDate: new Date(`${e.target.value}T00:00:00-03:00`) })
+              }
               />
             </FormControl>
             <FormControl mt="3" isRequired>
@@ -132,26 +131,23 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
                   </FormControl>
                   <FormControl mt="3" isRequired>
                     <FormLabel>Nível competitivo</FormLabel>
-                    <RadioGroup display="flex" justifyContent="center" gap="10px">
-                      {['Regional', 'Estadual', 'Nacional', 'Internacional'].map(
-                        (value) => {
-                          const radio = getCompetitiveLevelRadioProps({
-                            value,
-                          });
-                          return (
-                            <RadioCard key={value} {...radio} x="3" y="2">
-                              <Text p="0" m="0" fontSize="md">
-                                {value}
-                              </Text>
-                            </RadioCard>
-                          );
-                        }
-                      )}
+                    <RadioGroup display="flex" justifyContent="center" gap="10px" flexWrap={{ base: "wrap", md: "nowrap" }}>
+                      {['Regional', 'Estadual', 'Nacional', 'Internacional'].map((value) => {
+                        const radio = getCompetitiveLevelRadioProps({ value });
+                        return (
+                          <RadioCard key={value} {...radio} x="3" y="2" flexBasis={{ base: "50%", md: "auto" }}>
+                            <Text p="0" m="0" fontSize="md">
+                              {value}
+                            </Text>
+                          </RadioCard>
+                        );
+                      })}
                     </RadioGroup>
                   </FormControl>
                 </>
               )}
               {userData.isAthlete != undefined && !userData.isAthlete && (
+                <>
                 <FormControl mt="3" isRequired>
                   <FormLabel>Pratica algum esporte?</FormLabel>
                   <RadioGroup display="flex" gap="10px">
@@ -167,28 +163,29 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
                     })}
                   </RadioGroup>
                 </FormControl>
-              )}
-              { userData.practicesSport != undefined && userData.practicesSport && (
+                {userData.practicesSport != undefined && userData.practicesSport && (
                   <FormControl mt="3" isRequired>
-                  <FormLabel>Modalidade</FormLabel>
-                  <Input
-                    type="text"
-                    placeholder="e.g. Futebol"
-                    onChange={(e) =>
-                      setUserData({ ...userData, modality: e.target.value })
-                    }
-                  />
-                </FormControl>
-                )
+                    <FormLabel>Modalidade</FormLabel>
+                    <Input
+                      type="text"
+                      placeholder="e.g. Futebol"
+                      onChange={(e) =>
+                        setUserData({ ...userData, modality: e.target.value })
+                      }
+                    />
+                  </FormControl>)
+                }
+                </>
+              ) 
               }
             </FormControl>
-            <Flex justifyContent="end" my="3">
-              <Button mt="3" colorScheme="teal" type="submit">
+          </ModalBody>
+          <ModalFooter>
+              <Button colorScheme="teal" type="submit">
                 Salvar
               </Button>
-            </Flex>
-          </form>
-        </ModalBody>
+          </ModalFooter>
+        </form>
       </ModalContent>
     </Modal>
   );
