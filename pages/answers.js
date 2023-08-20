@@ -1,17 +1,19 @@
-import React, { use, useEffect, useState } from 'react'
-import Head from 'next/head'
+import React, { useEffect, useState } from 'react'
 import Layout from '../components/Layout'
 import useAuth from '../hooks/useAuth';
 import { getUserInfo } from './../services/userServices';
-import { Box, Card, CardBody, CardFooter, Flex, Heading, Image, Skeleton, Stack, Text, useToast, Button, CardHeader, Avatar, IconButton, Grid, GridItem, Input } from '@chakra-ui/react';
+import { Box, Card, CardBody, CardFooter, Flex, Heading, Image, Skeleton, Text, useToast, Button, Grid, GridItem, Input, useMultiStyleConfig } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import { CheckCircleIcon, DownloadIcon } from '@chakra-ui/icons';
+import { DownloadIcon } from '@chakra-ui/icons';
+import { getAllUsersAnswers } from './../services/userServices';
 
 export default function Answers() {
 
   const { user, loading } = useAuth();
   const [isLoaded, setIsLoaded] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
+
+  const styles = useMultiStyleConfig('Button', { variant: 'outline' });
 
   const toast = useToast();
   const router = useRouter();
@@ -23,10 +25,13 @@ export default function Answers() {
         if (data?.isSuperUser) {
           setUserInfo(data);
           setIsLoaded(true);
+          getAllUsersAnswers().then((result) => {
+            console.log(result)
+          })
         } else {
           toast({
-            title: "Você não possui permissão para acessar esta página!",
-            status: "error",
+            title: 'Você não possui permissão para acessar esta página!',
+            status: 'error',
             duration: 3000,
             isClosable: true,
           });
@@ -43,8 +48,8 @@ export default function Answers() {
       <Skeleton isLoaded={isLoaded}>
         {userInfo?.isSuperUser &&
           <Box mx={['2', '10']} h={['', '90vh']} display='flex' alignItems='center'>
-            <Grid templateColumns={['repeat(1)', 'repeat(1)' ,'repeat(3, 1fr)']} gap='10px'>
-              <GridItem>
+            <Grid templateColumns={['repeat(1)', 'repeat(1)' ,'repeat(5, 1fr)']} w='100%' gap='10px'>
+              <GridItem colSpan={['', '2']}>
                 <Card maxW='md' h='100%'>
                   <CardBody>
                     <Heading>Relatório de respostas</Heading>
@@ -58,17 +63,27 @@ export default function Answers() {
                   </CardFooter>
                 </Card>
               </GridItem>
-              <GridItem colSpan={['','2']}>
+              <GridItem colSpan={['','3']}>
                 <Card h='100%'>
                   <CardBody>
-                    <Heading>Importar arquivo:</Heading>
+                    <Heading>Importar arquivo</Heading>
                     <Text>Importar arquivos para alimentar a base de respostas</Text>
                   </CardBody>
                   <Flex justifyContent='center' alignItems='center'>
-                    <Image w='50%' src='https://www.lifewire.com/thmb/MgTvmCHCdizBlFT_geQIvNorp9Q=/1920x1326/filters:no_upscale():max_bytes(150000):strip_icc():format(webp)/cloud-upload-a30f385a928e44e199a62210d578375a.jpg'  alt='Relatórios' />
+                    <Image w='45%' src='https://cdn-icons-png.flaticon.com/512/564/564793.png'  alt='Relatórios' />
                   </Flex>
                   <CardFooter>
-                    <Input type='file'/>
+                  <Input
+                    disabled
+                    type='file'
+                    sx={{
+                      '::file-selector-button': {
+                        border: 'none',
+                        outline: 'none',
+                        ...styles,
+                      },
+                    }}
+                    />
                   </CardFooter>
                 </Card>
               </GridItem>

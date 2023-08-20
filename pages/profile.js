@@ -123,9 +123,9 @@ export default function Profile() {
   return (
     <>
       <Layout>
-        <Flex mx={['4', '40']} mt={['4', '10']} flexDirection={['column', 'row']}>
+        <Flex mx={['4', '4', '40']} mt={['4', '4', '10']} flexDirection={['column', 'column' ,'row']}>
           <Flex justifyContent='center'>
-            <Box align='center' flexDirection={['column', 'column']} gap='4' p='3' w={['90%', '25vw']} minH={['', '80vh']} me={['', '5']}>
+            <Box align='center' flexDirection={['column', 'column']} gap='4' p='3' w={['90%', '90%' ,'25vw']} minH={['', '' ,'80vh']} me={['', '' ,'5']}>
               <Skeleton isLoaded={isLoaded}>
                 <Avatar size='2xl' name={user?.name} src={user?.photoUrl} />
               </Skeleton>
@@ -144,7 +144,7 @@ export default function Profile() {
                           </AccordionButton>
                         </h2>
                         <AccordionPanel pb='2'>
-                          <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Data de nascimento:</strong> { userInfo?.birthDate.toDate().toLocaleDateString('pt-BR') }</Text>
+                          <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Data de nascimento:</strong> { new Date(userInfo?.birthDate).toLocaleDateString('pt-BR') }</Text>
                           <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Naturalidade:</strong> { userInfo?.birthCity }</Text>
                           <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>E-mail:</strong> { userInfo?.email }</Text>
                           <Flex gap='10px' justifyContent='center' p='2'>

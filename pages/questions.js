@@ -169,8 +169,8 @@ export function Questions() {
           {questionnaires.map((questionnaire) => (
           <Box key={'questionnaire-' + questionnaire.id} display='flex' flexDirection={'column'} minH='85vh' justifyContent='space-between'>
             <Box mt='2' minH='30vh' display='flex' flexDirection='column' justifyContent='space-betwwen'>
-              <Text fontSize={['2xl','5xl']} textAlign='center' fontWeight='bold' color='teal.500' textTransform='uppercase'>{questionnaire.name}</Text>
-              <Text px={['5', '10']} fontSize={['lg', '2xl', '2xl']} textAlign='center'>
+              <Text fontSize={['2xl','3xl', '5xl']} textAlign='center' fontWeight='bold' color='teal.500' textTransform='uppercase'>{questionnaire.name}</Text>
+              <Text px={['5', '10']} fontSize={['lg', 'xl', '2xl']} textAlign='center'>
                 Responda as questões objetivamente com o grau de certeza que você possui sobre as questões descritas abaixo, sendo
                 <strong> 1 ponto (absolutamente não concordo) e 5 pontos (absolutamente concordo).</strong>
               </Text>

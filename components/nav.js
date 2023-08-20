@@ -32,7 +32,7 @@ export function Nav({ openAuthModal }) {
       <Flex bgColor={bgColor} color={color} borderBottom={`1px solid ${borderColor})`} w='full' position='fixed' zIndex={99999}>
         <Flex alignItems='center' justifyContent='space-between' w='full' maxW='1200px' margin='0 auto' h='60px' px={[4, 8]}>
           <Flex alignItems="center" justifyContent='space-between' gap={3}>
-            <Heading size="md" mr={4} mt='2' display={['none', 'block']}>
+            <Heading size="md" mr={4} mt='2' display={['none', 'none','block']}>
               <Link href='/'>Resiliência no Esporte</Link>
             </Heading>
             <Link className={router.pathname == "/" ? 'nav-link active' : 'nav-link'} href='/'>Início <span className='sr-only'></span></Link>
