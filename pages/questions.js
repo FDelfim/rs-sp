@@ -200,6 +200,7 @@ export function Questions() {
           </Box>
           ))
           }
+          <WelcomeModal isOpen={isOpen} setIsOpen={setIsOpen} />
         </Box >
         :
         <Box p='2' mx={[4, 8]} >
@@ -212,7 +213,6 @@ export function Questions() {
           </Flex>
         </Box>)
       }
-      <WelcomeModal isOpen={isOpen} setIsOpen={setIsOpen} />
       </Layout>
     </>
   );
