@@ -144,7 +144,7 @@ export default function Profile() {
                           </AccordionButton>
                         </h2>
                         <AccordionPanel pb='2'>
-                          <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Data de nascimento:</strong> { new Date(userInfo?.birthDate).toLocaleDateString('pt-BR') }</Text>
+                          <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Data de nascimento:</strong> { userInfo?.birthDate.toDate().toLocaleDateString('pt-BR') }</Text>
                           <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Naturalidade:</strong> { userInfo?.birthCity }</Text>
                           <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>E-mail:</strong> { userInfo?.email }</Text>
                           <Flex gap='10px' justifyContent='center' p='2'>
