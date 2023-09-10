@@ -131,7 +131,6 @@ export function Questions() {
           }
         }
       } catch (error) {
-        console.log(error)
         toast({
           title: 'Erro ao salvar respostas',
           description: 'Não foi possível salvar as respostas',
