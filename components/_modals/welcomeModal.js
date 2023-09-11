@@ -188,7 +188,7 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
                 <Checkbox required mt="3" size="lg" colorScheme="teal" onChange={
                   (e) => setUserData({ ...userData, terms: e.target.checked })
                 }>Estou de acordo e aceito os termos de uso</Checkbox>
-                <Link ml='1' color='teal' display='flex' justifyContent='end' alignItems='end' onClick={() => { setShowTerms(true) }}>(Clique aqui para acessar!)</Link>
+                <Link ml='1' color='teal' display='flex' justifyContent='end' alignItems='end' onClick={() => { setShowTerms(true); setIsOpen(false) }}>(Clique aqui para acessar!)</Link>
               </Flex>
             </ModalBody>
             <ModalFooter>
@@ -199,7 +199,7 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
           </form>
         </ModalContent>
       </Modal>
-      <TermsModal isOpen={showTerms} setIsOpen={setShowTerms} />
+      <TermsModal isOpen={showTerms} setIsOpen={setShowTerms} setIsOpenWelcomeModal={setIsOpen} />
     </>
   );
 }
