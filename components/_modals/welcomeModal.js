@@ -185,7 +185,7 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
                 }
               </FormControl>
               <Flex>
-                <Checkbox required mt="3" size="lg" colorScheme="teal" onChange={
+                <Checkbox required mt="3" size="lg" colorScheme="teal" isRequired onChange={
                   (e) => setUserData({ ...userData, terms: e.target.checked })
                 }>Estou de acordo e aceito os termos de uso</Checkbox>
                 <Link ml='1' color='teal' display='flex' justifyContent='end' alignItems='end' onClick={() => { setShowTerms(true); setIsOpen(false) }}>(Clique aqui para acessar!)</Link>
