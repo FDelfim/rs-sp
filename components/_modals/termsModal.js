@@ -20,9 +20,9 @@ export default function TermsModal({isOpen, setIsOpen}) {
   }, [])
 
   return (
-    <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} size="5xl">
+    <Modal blockScrollOnMount={false} isOpen={isOpen} onClose={() => setIsOpen(false)} size="5xl">
       <ModalOverlay />
-      <ModalContent p='8'>
+      <ModalContent p={['2','8']}>
         <ModalCloseButton />
         <ModalHeader>
             <Heading>Termos de Uso</Heading>
@@ -34,7 +34,7 @@ export default function TermsModal({isOpen, setIsOpen}) {
             <Spinner size='xl' />
           </Flex>
           :
-          <Box h='65vh' overflowY='scroll' dangerouslySetInnerHTML={{ __html: term }}></Box>
+          <Box overflowy='auto' dangerouslySetInnerHTML={{ __html: term }} style={{ WebkitOverflowScrolling: 'touch'}}></Box>
           }
         </ModalBody>
       </ModalContent>
