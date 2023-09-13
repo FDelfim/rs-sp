@@ -1,6 +1,6 @@
 import React from 'react'
 import Layout from './../components/Layout';
-import { Box, Card, CardBody, Flex, Text } from '@chakra-ui/react';
+import { Box, Card, CardBody, Flex, Text, Link } from '@chakra-ui/react';
 import Footer from '../components/Footer';
 
 export default function about() {
@@ -18,7 +18,7 @@ export default function about() {
         </Text>
         <Text fontSize='2xl' fontWeight='bold'>Sobre o site</Text>
         <Text textAlign='justify'>
-          Aqui, você encontrará um espaço dedicado à Resiliência Psicológica no esporte, com destaque para a Escala de Resiliência no Esporte (RS-Sp), desenvolvida por mim durante o meu doutorado. Você poderá ler mais sobre as evidências de validade dela em (inserir hiperlink do artigo).
+          Você encontrará um espaço dedicado à Resiliência Psicológica no esporte, com destaque para a Escala de Resiliência no Esporte (RS-Sp), desenvolvida por mim durante o meu doutorado. Você poderá ler mais sobre as evidências de validade dela em <Link href='http://www.ijsp-online.com/abstract/view/52/494'>http://www.ijsp-online.com/abstract/view/52/494</Link>.
         </Text>
         <Text textAlign='justify'>
           A RS-Sp uma ferramenta cuidadosamente desenvolvida para medir o nível de resiliência de atletas e praticantes de esportes voltados para o alto rendimento. A RS-Sp é composta por 15 itens distribuídos em cinco fatores essenciais:
@@ -39,7 +39,7 @@ export default function about() {
           <i>Apoio Social Familiar:</i> Reflete a coesão e os laços colaborativos da família e amigos com o desempenho do atleta no esporte, fornecendo suporte emocional importante.
         </Text>
         <Text textAlign='justify'>
-          A RS-Sp foi validada para a língua portuguesa e sua aplicação permite uma compreensão mais aprofundada do nível de resiliência de atletas em diferentes dimensões. Seus resultados têm a capacidade de identificar pontos fortes e áreas de melhoria em cada indivíduo, contribuindo significativamente para o desenvolvimento pessoal e desempenho esportivo.
+          A RS-Sp foi validada para a língua portuguesa e sua aplicação permite uma compreensão da resiliência de atletas em diferentes dimensões. Seus resultados têm a capacidade de identificar pontos fortes e áreas de melhoria em cada indivíduo, contribuindo significativamente para o desenvolvimento pessoal e desempenho esportivo.
         </Text>
         <Text textAlign='justify'>
           Neste site, além de conhecer mais sobre a RS-Sp e ter acesso gratuito à ela, você encontrará uma rica variedade de conteúdos relacionados à resiliência no esporte. De artigos informativos a estudos de caso inspiradores, dicas práticas e muito mais, meu objetivo é fornecer informações valiosas que ajudem atletas e praticantes a desenvolverem sua mentalidade resiliente.
