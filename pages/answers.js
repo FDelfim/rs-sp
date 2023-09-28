@@ -18,6 +18,18 @@ export default function Answers() {
   const toast = useToast();
   const router = useRouter();
 
+  const fetchUsers = () => {
+    fetch('/api/get-all-users-data', {
+      method: 'POST',
+      body: JSON.stringify({ uid: user.uid }),
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+      }
+      );
+  }
+
   useEffect(() => {
     if (!loading) {
       getUserInfo(user).then((data) => {
@@ -59,7 +71,7 @@ export default function Answers() {
                   </CardBody>
                   <Image objectFit='cover' src='https://static.mundoeducacao.uol.com.br/mundoeducacao/2021/03/relatorio.jpg'  alt='Relatórios' />
                   <CardFooter justify='space-between' flexWrap='wrap' sx={{'& > button': { minW: '136px', }, }}>
-                    <Button flex='1' colorScheme='teal' variant='ghost' leftIcon={<DownloadIcon/>}>Download</Button>
+                    <Button flex='1' colorScheme='teal' variant='ghost' onClick={() => fetchUsers()} leftIcon={<DownloadIcon/>}>Download</Button>
                   </CardFooter>
                 </Card>
               </GridItem>
