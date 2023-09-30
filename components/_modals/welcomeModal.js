@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import {
-  FormControl, Input, FormLabel, Text, NumberInput, NumberInputField, NumberInputStepper, NumberIncrementStepper, NumberDecrementStepper, useRadioGroup,
-  Flex, RadioGroup, Modal, ModalContent, ModalOverlay, ModalBody, Heading, Divider, Button, useToast, ModalHeader, ModalFooter, Checkbox, Link, useDisclosure
+  FormControl, Input, FormLabel, Text, useRadioGroup, Flex, RadioGroup, Modal, ModalContent,
+  ModalOverlay, ModalBody, Heading, Button, useToast, ModalHeader, ModalFooter, Checkbox, Link, useDisclosure, Select
 } from '@chakra-ui/react';
 import useAuth from '../../hooks/useAuth';
 import RadioCard from '../RadioCard';
 import { storeUser } from '../../services/userServices';
-import  TermsModal from './termsModal';
+import TermsModal from './termsModal';
 
 export default function WelcomeModal({ isOpen, setIsOpen }) {
   const { user } = useAuth();
@@ -14,7 +14,17 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
 
   const { onClose } = useDisclosure();
 
-  const [userData, setUserData] = useState({});
+  const [userData, setUserData] = useState({
+    birthCity: null,
+    birthDate: null,
+    modality: null,
+    timePratice: null,
+    isAthlete: null,
+    practicesSport: null,
+    competitiveLevel: null,
+    atheleteLevel: null,
+    terms: false
+  });
   const [showTerms, setShowTerms] = useState(false);
 
   const { getRadioProps: getAthleteRadioProps } = useRadioGroup({
@@ -40,6 +50,13 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
     },
   });
 
+  const { getRadioProps: getAtheleteLevelRadioProps } = useRadioGroup({
+    name: 'atheleteLevel',
+    onChange: (e) => {
+      setUserData({ ...userData, atheleteLevel: e });
+    },
+  });
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -55,7 +72,7 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
     } catch (error) {
       toast({
         title: 'Erro!',
-        description: 'Ocorreu um erro ao realizar seu cadastro!',
+        description: error,
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -105,8 +122,81 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
                     );
                   })}
                 </RadioGroup>
-                {userData.isAthlete != undefined && userData.isAthlete && (
-                  <>
+              </FormControl>
+              {userData.isAthlete != undefined && userData.isAthlete && (
+                <>
+                  <FormControl mt="3" isRequired>
+                    <FormLabel>Qual nível?</FormLabel>
+                    <RadioGroup display="flex" gap="10px">
+                      {['Profissional', 'Amador'].map((value) => {
+                        const radio = getAtheleteLevelRadioProps({ value });
+                        return (
+                          <RadioCard key={value} {...radio} x="3" y="2">
+                            <Text p="0" m="0" fontSize="md">
+                              {value}
+                            </Text>
+                          </RadioCard>
+                        );
+                      }
+                      )}
+                    </RadioGroup>
+                  </FormControl>
+                  <FormControl mt="3" isRequired>
+                    <FormLabel>Modalidade</FormLabel>
+                    <Input
+                      type="text"
+                      placeholder="e.g. Futebol"
+                      onChange={(e) =>
+                        setUserData({ ...userData, modality: e.target.value })
+                      }
+                    />
+                  </FormControl>
+                  <FormControl mt="3" isRequired>
+                    <FormLabel>Há quanto tempo?</FormLabel>
+                    <Select placeholder='Selecione uma opção' onChange={(e) => setUserData({ ...userData, timePratice: e.target.value })}>
+                      <option value='Até 06 meses'>Até 06 meses</option>
+                      <option value='De 06 meses a 01 ano'>De 06 meses a 01 ano</option>
+                      <option value='De 01 a 02 anos'>De 01 a 02 anos</option>
+                      <option value='De 03 a 04 anos'>De 03 a 04 anos</option>
+                      <option value='De 05 a 10 anos'>De 05 a 10 anos</option>
+                      <option value='Acima de 10 anos'>Acima de 10 anos</option>
+                    </Select>
+                  </FormControl>
+                  <FormControl mt="3" isRequired>
+                    <FormLabel>Nível competitivo</FormLabel>
+                    <RadioGroup display="flex" justifyContent="center" gap="10px" flexWrap={{ base: "wrap", md: "nowrap" }}>
+                      {['Regional', 'Estadual', 'Nacional', 'Internacional'].map((value) => {
+                        const radio = getCompetitiveLevelRadioProps({ value });
+                        return (
+                          <RadioCard key={value} {...radio} x="3" y="2" flexBasis={{ base: "50%", md: "auto" }}>
+                            <Text p="0" m="0" fontSize="md">
+                              {value}
+                            </Text>
+                          </RadioCard>
+                        );
+                      })}
+                    </RadioGroup>
+                  </FormControl>
+                </>
+              )}
+              {userData.isAthlete != undefined && !userData.isAthlete && (
+                <>
+                  <FormControl mt="3" isRequired>
+                    <FormLabel>Pratica algum esporte?</FormLabel>
+                    <RadioGroup display="flex" gap="10px">
+                      {['Sim', 'Não'].map((value) => {
+                        const checkbox = getSportRadioProps({ value });
+                        return (
+                          <RadioCard key={value} {...checkbox} x="3" y="2">
+                            <Text p="0" m="0" fontSize="md">
+                              {value}
+                            </Text>
+                          </RadioCard>
+                        );
+                      })}
+                    </RadioGroup>
+                  </FormControl>
+                  {userData.practicesSport != undefined && userData.practicesSport && (
                     <FormControl mt="3" isRequired>
                       <FormLabel>Modalidade</FormLabel>
                       <Input
@@ -116,74 +206,11 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
                           setUserData({ ...userData, modality: e.target.value })
                         }
                       />
-                    </FormControl>
-                    <FormControl mt="3" isRequired>
-                      <FormLabel>Há quanto tempo?</FormLabel>
-                      <NumberInput step={1} defaultValue={0} min={0}>
-                        <NumberInputField
-                          onChange={(e) =>
-                            setUserData({
-                              ...userData,
-                              timePractice: e.target.value,
-                            })
-                          }
-                        />
-                        <NumberInputStepper>
-                          <NumberIncrementStepper />
-                          <NumberDecrementStepper />
-                        </NumberInputStepper>
-                      </NumberInput>
-                    </FormControl>
-                    <FormControl mt="3" isRequired>
-                      <FormLabel>Nível competitivo</FormLabel>
-                      <RadioGroup display="flex" justifyContent="center" gap="10px" flexWrap={{ base: "wrap", md: "nowrap" }}>
-                        {['Regional', 'Estadual', 'Nacional', 'Internacional'].map((value) => {
-                          const radio = getCompetitiveLevelRadioProps({ value });
-                          return (
-                            <RadioCard key={value} {...radio} x="3" y="2" flexBasis={{ base: "50%", md: "auto" }}>
-                              <Text p="0" m="0" fontSize="md">
-                                {value}
-                              </Text>
-                            </RadioCard>
-                          );
-                        })}
-                      </RadioGroup>
-                    </FormControl>
-                  </>
-                )}
-                {userData.isAthlete != undefined && !userData.isAthlete && (
-                  <>
-                    <FormControl mt="3" isRequired>
-                      <FormLabel>Pratica algum esporte?</FormLabel>
-                      <RadioGroup display="flex" gap="10px">
-                        {['Sim', 'Não'].map((value) => {
-                          const checkbox = getSportRadioProps({ value });
-                          return (
-                            <RadioCard key={value} {...checkbox} x="3" y="2">
-                              <Text p="0" m="0" fontSize="md">
-                                {value}
-                              </Text>
-                            </RadioCard>
-                          );
-                        })}
-                      </RadioGroup>
-                    </FormControl>
-                    {userData.practicesSport != undefined && userData.practicesSport && (
-                      <FormControl mt="3" isRequired>
-                        <FormLabel>Modalidade</FormLabel>
-                        <Input
-                          type="text"
-                          placeholder="e.g. Futebol"
-                          onChange={(e) =>
-                            setUserData({ ...userData, modality: e.target.value })
-                          }
-                        />
-                      </FormControl>)
-                    }
-                  </>
-                )
-                }
-              </FormControl>
+                    </FormControl>)
+                  }
+                </>
+              )
+              }
               <Flex>
                 <Checkbox required mt="3" size="lg" colorScheme="teal" isRequired onChange={
                   (e) => setUserData({ ...userData, terms: e.target.checked })
