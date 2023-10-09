@@ -40,6 +40,7 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
     onChange: (e) => {
       e === 'Não' ? e = false : e = true;
       setUserData({ ...userData, practicesSport: e });
+      setUserData({ ...userData, atheleteLevel: null })
     },
   });
 
@@ -154,11 +155,16 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
                   <FormControl mt="3" isRequired>
                     <FormLabel>Há quanto tempo?</FormLabel>
                     <Select placeholder='Selecione uma opção' onChange={(e) => setUserData({ ...userData, timePratice: e.target.value })}>
-                      <option value='Até 06 meses'>Até 06 meses</option>
-                      <option value='De 06 meses a 01 ano'>De 06 meses a 01 ano</option>
-                      <option value='De 01 a 02 anos'>De 01 a 02 anos</option>
-                      <option value='De 03 a 04 anos'>De 03 a 04 anos</option>
-                      <option value='De 05 a 10 anos'>De 05 a 10 anos</option>
+                      <option value='Até 06 meses'>Até 6 meses</option>
+                      <option value='De 6 meses a 01 ano'>De 6 meses a 1 ano</option>
+                      <option value='De 1 a 2 anos'>De 1 a 2 anos</option>
+                      <option value='De 3 a 4 anos'>De 3 a 4 anos</option>
+                      <option value='De 4 a 5 anos'>De 4 a 5 anos</option>
+                      <option value='De 5 a 6 anos'>De 5 a 6 anos</option>
+                      <option value='De 6 a 7 anos'>De 6 a 7 anos</option>
+                      <option value='De 7 a 8 anos'>De 7 a 8 anos</option>
+                      <option value='De 8 a 9 anos'>De 8 a 9 anos</option>
+                      <option value='De 9 a 10 anos'>De 9 a 10 anos</option>
                       <option value='Acima de 10 anos'>Acima de 10 anos</option>
                     </Select>
                   </FormControl>

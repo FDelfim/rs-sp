@@ -115,7 +115,7 @@ export default function Escala() {
                     <FiTrendingUp size={'35'} /><Text my='0' fontSize={'2xl'} ps='2'>Escala</Text>
                 </Flex>
             </Box>
-            <Accordion defaultIndex={[0]} allowMultiple backgroundColor='#ffffff' mt='3' boxShadow={'md'}>
+            <Accordion defaultIndex={[0]} allowMultiple backgroundColor='#ffffff' mt='3'  mx='40' boxShadow={'md'}>
                 <AccordionItem>
                     <AccordionButton>
                         <Box as="span" flex='1' textAlign='left'>
@@ -153,7 +153,7 @@ export default function Escala() {
                     </form>
                 </AccordionItem>
             </Accordion>
-            <Accordion defaultIndex={[0]} allowMultiple backgroundColor='#ffffff' mt='3' boxShadow={'md'}>
+            <Accordion defaultIndex={[0]} allowMultiple backgroundColor='#ffffff' mt='3' boxShadow={'md'} mx='40'>
                 <AccordionItem>
                     <AccordionButton>
                         <Box as="span" flex='1' textAlign='left'>

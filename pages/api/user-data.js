@@ -13,6 +13,6 @@ export default async (req, res) => {
             res.status(200).json({ user: userDoc.data() });
         }
     } catch (error) {
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Erro ao buscar usuário!' });
     }
 }
