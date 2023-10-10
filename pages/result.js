@@ -14,7 +14,7 @@ const secretKey = process.env.NEXT_PUBLIC_CRYPT_KEY;
 export default function result() {
 
   const [userName, setUserName] = useState('');
-  const [series, setSeries] = useState([]);
+  const [series, setSeries] = useState(null);
   const { user } = useAuth();
   const router = useRouter();
 
@@ -23,10 +23,9 @@ export default function result() {
     const encrypted = url.split('?')[1];
     const bytes = CryptoJS.AES.decrypt(encrypted, secretKey);
     const decrypted = bytes.toString(CryptoJS.enc.Utf8);
-    console.log(decrypted);
     const splited = decrypted.split('&');
     const userName = splited[0].split('=')[1];
-    const series = splited[1].split('=')[1].split('-').map((value) => parseInt(value));
+    const series = JSON.parse(splited[1].split('=')[1])
     setUserName(userName);
     setSeries(series);
   }, []);
@@ -49,18 +48,21 @@ export default function result() {
       <Heading fontWeight='bold' textAlign='center'>Resumo da resiliência psicológica no esporte de {userName}</Heading>
       <Flex direction={['column', 'row']} justifyContent={['center', 'between']}>
         <Box w={['100vw', '40vw']} mt='5'>
-          <RadarChart
-            series={series}
-          />
+          {
+            series &&
+            <RadarChart
+              series={series}
+            />
+          }
         </Box>
         <Box mt='5' w={['100vw', '50vw']} display='flex' flexDirection='column' justifyContent='center' textAlign={['center', 'start']}>
-          <Text fontSize={['md', 'lg']}><strong>ES</strong> - Experiência Esportivas: {series[0]}</Text>
+          {/* <Text fontSize={['md', 'lg']}><strong>ES</strong> - Experiência Esportivas: {series[0]}</Text>
           <Text fontSize={['md', 'lg']}><strong>ASF</strong> - Apoio Social Familiar: {series[1]} </Text>
           <Text fontSize={['md', 'lg']}><strong>RPC</strong> - Recursos Pessoais e Competências: {series[2]} </Text>
           <Text fontSize={['md', 'lg']}><strong>E</strong> - Espiritualidade: {series[3]} </Text>
           <Text fontSize={['md', 'lg']}><strong>ASE</strong> - Apoio Social Esportivo: {series[4]} </Text>
           <Text fontSize={['md', 'lg']}><strong>Resiliência total</strong>: {(series.reduce((a, b) => a + b, 0) / series.length).toFixed(2)}</Text>
-          <Text textAlign={['center', 'end']} fontSize={['md', 'lg']} color='gray'>A escala varia entre 0 a 15</Text>
+          <Text textAlign={['center', 'end']} fontSize={['md', 'lg']} color='gray'>A escala varia entre 0 a 15</Text> */}
         </Box>
       </Flex>
       { (user?.name && userName == user?.name) && 

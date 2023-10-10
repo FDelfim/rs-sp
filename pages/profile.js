@@ -18,6 +18,7 @@ const translate = {
   'familySocialSupport': 'Apoio Social Familiar',
   'sportSocialSupport': 'Apoio Social Esportivo',
   'sportExperiences': 'Experiências Esportivas',
+  'total': 'Total'
 }
 
 const reverseTranslate = {
@@ -26,6 +27,14 @@ const reverseTranslate = {
   'Apoio Social Familiar': 'familySocialSupport',
   'Apoio Social Esportivo': 'sportSocialSupport',
   'Experiências Esportivas': 'sportExperiences',
+}
+
+const colorScale = {
+  'Extremamente Alto': 'teal',
+  'Alto': 'whatsapp',
+  'Moderado': 'yellow',
+  'Baixo': 'orange',
+  'Extremamente Baixo': 'red',
 }
 
 export default function Profile() {
@@ -38,8 +47,8 @@ export default function Profile() {
   const [lastQuestionnaire, setLastQuestionnaire] = useState('');
   const [isLoaded, setIsLoaded] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
-  const [scale, setScale] = useState(null);
   const [series, setSeries] = useState(null);
+  const [userRank, setUserRank] = useState({})
 
   const handleShare = () => {
     if (navigator.share) {
@@ -51,6 +60,7 @@ export default function Profile() {
         .catch((error) => console.log('Error sharing', error));
     }
   }
+
   const showToastError = () => {
     toast({
       title: 'Erro ao buscar dados!',
@@ -60,7 +70,7 @@ export default function Profile() {
       isClosable: true
     });
   };
-  
+
   const fetchJson = async (url) => {
     const response = await fetch(url);
     if (response.status !== 200) {
@@ -69,10 +79,10 @@ export default function Profile() {
     }
     return response.json();
   };
-  
+
   const getSeries = (scale, answers, questionnaire) => {
-    const dimensionSums = {}; 
-    const dimensionCounts = {}; 
+    const dimensionSums = {};
+    const dimensionCounts = {};
 
     for (const dimension in scale) {
       dimensionSums[dimension] = 0;
@@ -96,40 +106,59 @@ export default function Profile() {
     return dimensionSums;
   };
 
+  const rankUser = (dimensionSums, scale) => {
+    const userRankings = {};
+    for (const dimension in dimensionSums) {
+      const value = dimensionSums[dimension];
+      const dimensionScale = scale[dimension];
+
+      if (value >= parseFloat(dimensionScale.extremelyHigh)) {
+        userRankings[dimension] = 'Extremamente Alto';
+      } else if (value >= parseFloat(dimensionScale.high)) {
+        userRankings[dimension] = 'Alto';
+      } else if (value >= parseFloat(dimensionScale.moderate)) {
+        userRankings[dimension] = 'Moderado';
+      } else if (value >= parseFloat(dimensionScale.low)) {
+        userRankings[dimension] = 'Baixo';
+      } else {
+        userRankings[dimension] = 'Extremamente Baixo';
+      }
+    }
+    setUserRank(userRankings);
+  }
 
   const fetchScale = async (level) => {
     try {
       const data = await fetchJson(`/api/settings/scale?id=${level}`);
-      setScale(data.scale);
       return data;
     } catch (error) {
       console.error(error);
     }
   };
-  
+
   const fetchQuestionnaire = async (questionnaireId) => {
     try {
-      const data = await fetchJson(`/api/questionnaires/get-questionnaire?id=${questionnaireId}`);
+      const data = await fetchJson(`/api/questionnaires/get-questionnaire-questions?id=${questionnaireId}`);
       setLastQuestionnaire(data.questionnaire);
       return data;
     } catch (error) {
       console.error(error);
     }
   };
-  
+
   const fetchUserAnswers = async () => {
     try {
       const data = await fetchJson(`/api/user/get-user-answers?id=${user?.uid}`);
       setAnswers(data.answers);
       const questionnaire = await fetchQuestionnaire(data.answers.questionnaire);
-      return {questionnaire: questionnaire, answers: data};
+      return { questionnaire: questionnaire, answers: data };
     } catch (error) {
       console.error(error);
     } finally {
       setIsLoaded(true);
     }
   };
-  
+
   const fetchUserData = async () => {
     try {
       const data = await fetchJson(`/api/user-data?id=${user.uid}`);
@@ -141,23 +170,24 @@ export default function Profile() {
       console.error(error);
     }
   };
-  
+
   const getData = async () => {
     const scaleFetch = await fetchUserData();
     const questionnaireFetch = await fetchUserAnswers();
-    getSeries(scaleFetch, questionnaireFetch.answers.answers, questionnaireFetch.questionnaire.answers)
+    const dimensionSums = getSeries(scaleFetch, questionnaireFetch.answers.answers, questionnaireFetch.questionnaire.answers)
+    rankUser(dimensionSums, scaleFetch);
   };
-  
+
   useEffect(() => {
     if (user && !isLoaded) {
       getData();
     }
   }, [user?.uid]);
-  
+
   return (
     <>
       <Layout>
-        <Flex mx={['4', '4', '40']} mt={['4', '4', '10']} flexDirection={['column', 'column', 'row']}>
+        <Flex mx={['4', '25', '30']} mt={['4', '4', '10']} flexDirection={['column', 'column', 'row']}>
           <Flex justifyContent='center'>
             <Box align='center' flexDirection={['column', 'column']} gap='4' p='3' w={['90%', '90%', '25vw']} minH={['', '', '80vh']} me={['', '', '5']}>
               <Skeleton isLoaded={isLoaded}>
@@ -178,7 +208,6 @@ export default function Profile() {
                           </AccordionButton>
                         </h2>
                         <AccordionPanel pb='2'>
-                          {/* <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Data de nascimento:</strong> { userInfo?.birthDate.toDate().toLocaleDateString('pt-BR') }</Text> */}
                           <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Naturalidade:</strong> {userInfo?.birthCity}</Text>
                           <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>E-mail:</strong> {userInfo?.email}</Text>
                           <Flex gap='10px' justifyContent='center' p='2'>
@@ -209,10 +238,20 @@ export default function Profile() {
                           <RadarChart series={series} />
                         </GridItem>
                         <GridItem colSpan={[3, 1]} display='flex' flexDirection='column' justifyContent='end' alignItems='center' mb={['0', '10']}>
+                          {
+                            userRank && userInfo.isAthlete &&
+                            <Flex>
+                              {Object.entries(userRank).map(([key, value]) => (
+                                key === 'total' &&
+                                <Box key={key}>
+                                  <Badge colorScheme={colorScale[value]}>Nível de resiliência {translate[key]}: {value}</Badge>
+                                </Box>
+                              ))}
+                            </Flex>
+                          }
                           <Button colorScheme='teal' onClick={() => {
-                            const seriesString = series.join('-');
-                            const userName = userInfo.name;
-                            const text = `userName=${userName}&series=${seriesString}`;
+                            const seriesString = JSON.stringify(series);
+                            const text = `name=${user?.name}&serie=${seriesString}`;
                             const ciphertext = CryptoJS.AES.encrypt(text, secretKey).toString();
                             window.location.href = `/result?${ciphertext}`;
                           }} mb='3' href='/result'>Ver resiliência detalhada</Button>
@@ -235,14 +274,7 @@ export default function Profile() {
                       </Grid>
                     }
                   </Box>
-                  <Box>
-                    <Text fontSize={['xl', '2xl']} fontWeight='500' mt='4' textAlign={['center', 'start']} m='0'><strong>Último questionário respondido</strong></Text>
-                    <Text textAlign={['center', 'start']} fontSize={['md', 'xl']}>{lastQuestionnaire?.name}</Text>
-                    <Text fontSize={['xl', '2xl']} fontWeight='500' mt='4' textAlign={['center', 'start']} m='0'><strong>Data da útima resposta</strong></Text>
-                    <Text textAlign={['center', 'start']} fontSize={['md', 'xl']}>{
-                      // answers[0]?.created_at.toDate().toLocaleDateString('pt-BR')
-                    }</Text>
-                  </Box>
+
                 </Skeleton>
                 :
                 <Skeleton isLoaded={isLoaded} h='100%'>
