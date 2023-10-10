@@ -114,11 +114,11 @@ export default function Profile() {
 
       if (value >= parseFloat(dimensionScale.extremelyHigh)) {
         userRankings[dimension] = 'Extremamente Alto';
-      } else if (value >= parseFloat(dimensionScale.high)) {
+      } else if (value <= parseFloat(dimensionScale.high) && value > parseFloat(dimensionScale.moderate)) {
         userRankings[dimension] = 'Alto';
-      } else if (value >= parseFloat(dimensionScale.moderate)) {
+      } else if (value <= parseFloat(dimensionScale.moderate) && value > parseFloat(dimensionScale.low)) {
         userRankings[dimension] = 'Moderado';
-      } else if (value >= parseFloat(dimensionScale.low)) {
+      } else if (value <= parseFloat(dimensionScale.low) && value > parseFloat(dimensionScale.extremelyLow)) {
         userRankings[dimension] = 'Baixo';
       } else {
         userRankings[dimension] = 'Extremamente Baixo';
