@@ -1,5 +1,5 @@
 import { Box, Flex, useColorModeValue } from '@chakra-ui/react';
-import NavBar from './Nav';
+import NavBar from './Navbar';
 import Head from 'next/head';
 
 function Layout({ children }) {

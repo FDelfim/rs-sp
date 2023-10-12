@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Flex, Icon, useColorMode, useColorModeValue, Button, Avatar, Divider,
+import { Flex, useColorMode, useColorModeValue, Button, Avatar, Divider,
   Menu, MenuButton, MenuList, MenuItem, Heading, useToast } from '@chakra-ui/react';
 import { MoonIcon, SunIcon, CheckIcon, SettingsIcon } from '@chakra-ui/icons';
 import useAuth from '../hooks/useAuth';

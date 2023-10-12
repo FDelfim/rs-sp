@@ -13,23 +13,9 @@ export default function Answers() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
   const toast = useToast();
-
-  const [configPage, setConfigPage] = useState('Escala');
-
-
   const router = useRouter();
 
-  const fetchUsers = () => {
-    fetch('/api/get-all-users-data', {
-      method: 'POST',
-      body: JSON.stringify({ uid: user.uid }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-      }
-      );
-  }
+  const [configPage, setConfigPage] = useState('Escala');
 
   useEffect(() => {
     if (!loading) {

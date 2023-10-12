@@ -9,33 +9,9 @@ import useAuth from '../hooks/useAuth';
 import { InfoIcon } from '@chakra-ui/icons';
 import { BsWhatsapp, BsTwitter, BsFacebook, BsTelegram, BsLinkedin, BsShare } from 'react-icons/bs';
 import CryptoJS from 'crypto-js';
+import {translate, reverseTranslate, colorScale} from '../utils/translates';
 
 const secretKey = process.env.NEXT_PUBLIC_CRYPT_KEY;
-
-const translate = {
-  'spirituality': 'Espiritualidade',
-  'personalResources': 'Recursos Pessoais e Competências',
-  'familySocialSupport': 'Apoio Social Familiar',
-  'sportSocialSupport': 'Apoio Social Esportivo',
-  'sportExperiences': 'Experiências Esportivas',
-  'total': 'Total'
-}
-
-const reverseTranslate = {
-  'Espiritualidade': 'spirituality',
-  'Recursos Pessoais e Competências': 'personalResources',
-  'Apoio Social Familiar': 'familySocialSupport',
-  'Apoio Social Esportivo': 'sportSocialSupport',
-  'Experiências Esportivas': 'sportExperiences',
-}
-
-const colorScale = {
-  'Extremamente Alto': 'teal',
-  'Alto': 'whatsapp',
-  'Moderado': 'yellow',
-  'Baixo': 'orange',
-  'Extremamente Baixo': 'red',
-}
 
 export default function Profile() {
 
@@ -44,7 +20,6 @@ export default function Profile() {
   const { isOpen: info, onToggle: onInfo } = useDisclosure();
 
   const [answers, setAnswers] = useState(null);
-  const [lastQuestionnaire, setLastQuestionnaire] = useState('');
   const [isLoaded, setIsLoaded] = useState(false);
   const [userInfo, setUserInfo] = useState(null);
   const [series, setSeries] = useState(null);
@@ -57,7 +32,13 @@ export default function Profile() {
         text: 'Consegui ver o resultado da minha resiliência psicológica no esporte neste site, veja a sua também!',
         url: 'https://rs-sp.vercel.app/',
       })
-        .catch((error) => console.log('Error sharing', error));
+        .catch((error) => toast({ 
+          title: 'Erro ao compartilhar!',
+          description: 'Tente novamente mais tarde',
+          status: 'error',
+          duration: 5000,
+          isClosable: true
+        }));
     }
   }
 
@@ -120,11 +101,20 @@ export default function Profile() {
         userRankings[dimension] = 'Moderado';
       } else if (value <= parseFloat(dimensionScale.low) && value > parseFloat(dimensionScale.extremelyLow)) {
         userRankings[dimension] = 'Baixo';
-      } else {
+      } else if(value <= parseFloat(dimensionScale.extremelyLow)){
         userRankings[dimension] = 'Extremamente Baixo';
+      } else{
+        userRankings[dimension] = 'Não classificado';
       }
     }
-    setUserRank(userRankings);
+
+    const sortedKeys = Object.keys(userRankings).sort();
+    const sortedUserRankings = {};
+    for (const key of sortedKeys) {
+      sortedUserRankings[key] = userRankings[key];
+    }
+
+    setUserRank(sortedUserRankings);
   }
 
   const fetchScale = async (level) => {
@@ -139,7 +129,6 @@ export default function Profile() {
   const fetchQuestionnaire = async (questionnaireId) => {
     try {
       const data = await fetchJson(`/api/questionnaires/get-questionnaire-questions?id=${questionnaireId}`);
-      setLastQuestionnaire(data.questionnaire);
       return data;
     } catch (error) {
       console.error(error);
@@ -208,6 +197,7 @@ export default function Profile() {
                           </AccordionButton>
                         </h2>
                         <AccordionPanel pb='2'>
+                          <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Data de Nascimento:</strong> {new Date(userInfo?.birthDate?.seconds * 1000).toLocaleDateString()}</Text>
                           <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Naturalidade:</strong> {userInfo?.birthCity}</Text>
                           <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>E-mail:</strong> {userInfo?.email}</Text>
                           <Flex gap='10px' justifyContent='center' p='2'>
@@ -251,7 +241,10 @@ export default function Profile() {
                           }
                           <Button colorScheme='teal' onClick={() => {
                             const seriesString = JSON.stringify(series);
-                            const text = `name=${user?.name}&serie=${seriesString}`;
+                            let text = `name=${user?.name}&serie=${seriesString}`;
+                            if(userRank){
+                              text += `&rank=${JSON.stringify(userRank)}`
+                            }
                             const ciphertext = CryptoJS.AES.encrypt(text, secretKey).toString();
                             window.location.href = `/result?${ciphertext}`;
                           }} mb='3' href='/result'>Ver resiliência detalhada</Button>
@@ -267,7 +260,7 @@ export default function Profile() {
                           </Box>
                           <Slide direction='bottom' in={info} style={{ zIndex: 10 }}>
                             <Box p='4' color='white' mt='4' bg='teal' shadow='md' textAlign='center'>
-                              <Text><strong>ES</strong> - Experiência Esportivas | <strong>ASF</strong> - Apoio Social Familiar | <strong>RPC</strong> - Recursos Pessoais e Competências | <strong>ESPI</strong> - Espiritualidade | <strong>ASE</strong> - Apoio Social Esportivo</Text>
+                              <Text><strong>EE</strong> - Experiência Esportivas | <strong>ASF</strong> - Apoio Social Familiar | <strong>RPC</strong> - Recursos Pessoais e Competências | <strong>ESPI</strong> - Espiritualidade | <strong>ASE</strong> - Apoio Social Esportivo</Text>
                             </Box>
                           </Slide>
                         </GridItem>

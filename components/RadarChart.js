@@ -1,16 +1,9 @@
 import { useColorModeValue, Box } from '@chakra-ui/react';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
-
 const ApexCharts = dynamic(() => import('react-apexcharts'), { ssr: false });
+import { abbreviation } from '../utils/translates';
 
-const translate = {
-  'sportExperiences': 'ES',
-  'familySocialSupport': 'ASF',
-  'personalResources': 'RPC',
-  'spirituality': 'ESPI',
-  'sportSocialSupport': 'ASE',
-}
 
 export default function RadarChart(props) {
   const valores = props.series;
@@ -53,7 +46,7 @@ export default function RadarChart(props) {
       autoSelected: 'zoom',
     },
     xaxis: {
-      categories: Object(keysValues.map((item) => translate[item.name])),
+      categories: Object(keysValues.map((item) => abbreviation[item.name])),
       labels: {
         show: true,
         style: {
