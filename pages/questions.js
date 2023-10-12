@@ -124,6 +124,7 @@ export function Questions() {
             data.created_at = new Date();
             data.questionnaire = questionnaires[0].id;
             const docRef = doc(answersRef);
+            console.log(data)
             await setDoc(docRef, data);
           } else {
             
@@ -146,6 +147,17 @@ export function Questions() {
   return (
     <>
       <Layout>
+        <Head>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                  if(!document.cookie || !document.cookie.includes('rs-sp')) {
+                    window.location.href = "/"
+                  }
+                `
+            }}
+          />
+        </Head>
       { isLoading ? 
         <Flex h='90vh' justifyContent='center' alignItems='center'>
           <Spinner size='xl' />
