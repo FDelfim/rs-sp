@@ -1,9 +1,9 @@
 import { Box, Flex, useColorModeValue } from '@chakra-ui/react';
-import NavBar from './nav';
+import NavBar from './Navbar';
 import Head from 'next/head';
 
 function Layout({ children }) {
-  const bgColor = useColorModeValue('gray.50', 'gray.900');
+  const bgColor = useColorModeValue('gray.100', 'gray.900');
   return (
     <>
       <Head>

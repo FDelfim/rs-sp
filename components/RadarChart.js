@@ -1,15 +1,30 @@
-import { useColorModeValue, Card, Box, Flex } from '@chakra-ui/react';
+import { useColorModeValue, Box } from '@chakra-ui/react';
 import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
 const ApexCharts = dynamic(() => import('react-apexcharts'), { ssr: false });
+import { abbreviation } from '../utils/translates';
+
 
 export default function RadarChart(props) {
-  
-  const valores  = props.series ?? [0,0,0,0,0]
+  const valores = props.series;
 
   const colorMode = useColorModeValue('light', 'dark');
   const labelColor = colorMode === 'light' ? '#263238' : '#ffffff';
   const primaryRadarColor = colorMode === 'light' ? '#e9e9e9' : '#999999';
   const secondaryRadarColor = colorMode === 'light' ? '#ffffff' : '#5e6572';
+
+  const [keysValues, setKeysValues] = useState([]);
+
+  useEffect(() => {
+    const newKeysValues = Object.keys(valores)
+      .filter((key) => key !== 'total')
+      .sort()
+      .map((key) => ({
+        name: key,
+        value: parseInt(valores[key]),
+      }));
+    setKeysValues(newKeysValues);
+  }, [valores]);
 
   const options = {
     plotOptions: {
@@ -17,28 +32,28 @@ export default function RadarChart(props) {
         polygons: {
           strokeColor: '#e9e9e9',
           fill: {
-            colors: [primaryRadarColor, secondaryRadarColor]
-          }
+            colors: [primaryRadarColor, secondaryRadarColor],
+          },
         },
         offsetX: 10,
         offsetY: 10,
-      }
+      },
     },
     chart: {
       toolbar: {
-        show: false
+        show: false,
       },
-      autoSelected: "zoom"
+      autoSelected: 'zoom',
     },
     xaxis: {
-      categories: ['ES', 'ASF', 'RPC', 'E', 'ASE'],
+      categories: Object(keysValues.map((item) => abbreviation[item.name])),
       labels: {
         show: true,
         style: {
-          colors: [labelColor, labelColor, labelColor, labelColor, labelColor],
+          colors: labelColor,
           fontSize: '12px',
-        }
-      }
+        },
+      },
     },
     yaxis: {
       show: false,
@@ -47,12 +62,12 @@ export default function RadarChart(props) {
     },
     fill: {
       opacity: 0.4,
-      colors: ['#319795']
+      colors: ['#319795'],
     },
     stroke: {
       show: true,
       width: 4,
-      colors: ['#319795']
+      colors: ['#319795'],
     },
     markers: {
       colors: ['#319795'],
@@ -79,16 +94,18 @@ export default function RadarChart(props) {
         },
       },
     ],
-  }
+  };
 
-  const series = [{
-    data: valores,
-  }]
+  const series = [
+    {
+      data: keysValues.map((item) => item.value),
+    },
+  ];
 
   return (
-    <Box w='100%' p='0' m='0'>
+    <Box w="100%" p="0" m="0">
       <ApexCharts
-        name='Resiliência no Esporte'
+        name="Resiliência no Esporte"
         options={options}
         series={series}
         type="radar"
