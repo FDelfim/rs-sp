@@ -1,12 +1,12 @@
 import Link from 'next/link';
-import { Flex, useColorMode, useColorModeValue, Button, Avatar, Divider,
+import { Flex, Icon, useColorMode, useColorModeValue, Button, Avatar, Divider,
   Menu, MenuButton, MenuList, MenuItem, Heading, useToast } from '@chakra-ui/react';
 import { MoonIcon, SunIcon, CheckIcon, SettingsIcon } from '@chakra-ui/icons';
 import useAuth from '../hooks/useAuth';
 import withAuthModal from './Auth';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { getUserInfo } from '../services/userServices';
+import { getUserInfo } from './../services/userServices';
 
 export function Nav({ openAuthModal }) {
 
@@ -19,6 +19,8 @@ export function Nav({ openAuthModal }) {
   const borderColor = useColorModeValue('#DDD', '#27272A');
   const [ userInfo, setUserInfo ] = useState({});
 
+  const toast = useToast();
+
   useEffect(()=>{
     getUserInfo(user).then((result) => {
       setUserInfo(result);
@@ -27,7 +29,7 @@ export function Nav({ openAuthModal }) {
 
   return (
     <>
-      <Flex bgColor={bgColor} color={color} borderBottom={`1px solid ${borderColor})`} w='full' position='fixed' zIndex={99999} boxShadow={'md'}>
+      <Flex bgColor={bgColor} color={color} borderBottom={`1px solid ${borderColor})`} w='full' position='fixed' zIndex={99999}>
         <Flex alignItems='center' justifyContent='space-between' w='full' maxW='1200px' margin='0 auto' h='60px' px={[4, 8]}>
           <Flex alignItems="center" justifyContent='space-between' gap={3}>
             <Heading size="md" mr={4} mt='2' display={['none', 'none','block']}>
@@ -46,7 +48,7 @@ export function Nav({ openAuthModal }) {
                       <MenuItem onClick={() => router.push('/profile')}>Perfil</MenuItem>
                       <MenuItem onClick={() => signout()}>Sair</MenuItem>
                       <Divider orientation='horizontal' p='0' m='0'/>
-                      { userInfo?.isSuperUser && <MenuItem textColor='teal.500' onClick={() => router.push('/settings')}><CheckIcon me='1'/>Área Super Usuário</MenuItem> }
+                      { userInfo?.isSuperUser && <MenuItem textColor='teal' onClick={() => router.push('/answers')}><CheckIcon me='1'/>Área Super Usuário</MenuItem> }
                     </MenuList>
                   </Menu>
                 </>
