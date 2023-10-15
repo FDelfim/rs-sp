@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import useAuth from './hooks/useAuth';
 
 export function middleware(req){
     let verify = req.cookies.has('rs-sp')
@@ -11,5 +12,5 @@ export function middleware(req){
 }
 
 export const config = {
-    matcher : ['/:path*']
+    matcher : ['/questions', '/profile', '/api/:path*']
 }
