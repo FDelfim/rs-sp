@@ -3,13 +3,15 @@ import {
   AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, Badge, Grid, GridItem, useDisclosure, Link
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
+import { InfoIcon } from '@chakra-ui/icons';
+import { BsWhatsapp, BsTwitter, BsFacebook, BsTelegram, BsLinkedin, BsShare } from 'react-icons/bs';
+import { translate, reverseTranslate, colorScale } from '../utils/translates';
 import Layout from '../components/Layout';
 import RadarChart from '../components/RadarChart';
 import useAuth from '../hooks/useAuth';
-import { InfoIcon } from '@chakra-ui/icons';
-import { BsWhatsapp, BsTwitter, BsFacebook, BsTelegram, BsLinkedin, BsShare } from 'react-icons/bs';
 import CryptoJS from 'crypto-js';
-import {translate, reverseTranslate, colorScale} from '../utils/translates';
+import amateurRating from '../utils/amateurRating';
+import { storeUser } from '../services/userServices';
 
 const secretKey = process.env.NEXT_PUBLIC_CRYPT_KEY;
 
@@ -32,7 +34,7 @@ export default function Profile() {
         text: 'Consegui ver o resultado da minha resiliência psicológica no esporte neste site, veja a sua também!',
         url: 'https://rs-sp.vercel.app/',
       })
-        .catch((error) => toast({ 
+        .catch((error) => toast({
           title: 'Erro ao compartilhar!',
           description: 'Tente novamente mais tarde',
           status: 'error',
@@ -87,34 +89,56 @@ export default function Profile() {
     return dimensionSums;
   };
 
-  const rankUser = (dimensionSums, scale) => {
-    const userRankings = {};
-    for (const dimension in dimensionSums) {
-      const value = dimensionSums[dimension];
-      const dimensionScale = scale[dimension];
+  const rankUser = async (dimensionSums, scale, user) => {
+    let userRankings = {};
+    if (user.atheleteLevel === 'Profissional') {
+      userRankings = {};
+      for (const dimension in dimensionSums) {
+        const value = dimensionSums[dimension];
+        const dimensionScale = scale[dimension];
+        if (value >= parseFloat(dimensionScale.extremelyHigh)) {
+          userRankings[dimension] = 'Extremamente Alto';
+        } else if (value <= parseFloat(dimensionScale.high) && value > parseFloat(dimensionScale.moderate)) {
+          userRankings[dimension] = 'Alto';
+        } else if (value <= parseFloat(dimensionScale.moderate) && value > parseFloat(dimensionScale.low)) {
+          userRankings[dimension] = 'Moderado';
+        } else if (value <= parseFloat(dimensionScale.low) && value > parseFloat(dimensionScale.extremelyLow)) {
+          userRankings[dimension] = 'Baixo';
+        } else if (value <= parseFloat(dimensionScale.extremelyLow)) {
+          userRankings[dimension] = 'Extremamente Baixo';
+        } else {
+          userRankings[dimension] = 'Não classificado';
+        }
+      }
+      const sortedKeys = Object.keys(userRankings).sort();
+      const sortedUserRankings = {};
+      for (const key of sortedKeys) {
+        sortedUserRankings[key] = userRankings[key];
+      }
+      setUserRank(sortedUserRankings);
+    }else if(user.atheleteLevel === 'Amador'){
+      if(user.classified){
+        setUserRank(user.rating);
+      }else{
+        let sample = {};
+        [userRankings, sample] = await amateurRating(dimensionSums);
+        setUserRank(userRankings);      
+        for (const dimension in sample) {
+          sample[dimension].push(dimensionSums[dimension]);
+        }
+        user.classified = true;
+        user.rating = userRankings;
+        storeUser(user, user.id);
 
-      if (value >= parseFloat(dimensionScale.extremelyHigh)) {
-        userRankings[dimension] = 'Extremamente Alto';
-      } else if (value <= parseFloat(dimensionScale.high) && value > parseFloat(dimensionScale.moderate)) {
-        userRankings[dimension] = 'Alto';
-      } else if (value <= parseFloat(dimensionScale.moderate) && value > parseFloat(dimensionScale.low)) {
-        userRankings[dimension] = 'Moderado';
-      } else if (value <= parseFloat(dimensionScale.low) && value > parseFloat(dimensionScale.extremelyLow)) {
-        userRankings[dimension] = 'Baixo';
-      } else if(value <= parseFloat(dimensionScale.extremelyLow)){
-        userRankings[dimension] = 'Extremamente Baixo';
-      } else{
-        userRankings[dimension] = 'Não classificado';
+        const res = await fetch('/api/settings/amateurSample', {
+          method: 'POST',
+          body: JSON.stringify({
+            data: sample
+          })
+        })
+        console.log(res)
       }
     }
-
-    const sortedKeys = Object.keys(userRankings).sort();
-    const sortedUserRankings = {};
-    for (const key of sortedKeys) {
-      sortedUserRankings[key] = userRankings[key];
-    }
-
-    setUserRank(sortedUserRankings);
   }
 
   const fetchScale = async (level) => {
@@ -154,17 +178,17 @@ export default function Profile() {
       setUserInfo(data.user);
       const scaleId = data.user.atheleteLevel === 'Profissional' ? 'professionalScale' : 'amateurScale';
       const scale = await fetchScale(scaleId);
-      return scale;
+      return [scale, data.user];
     } catch (error) {
       console.error(error);
     }
   };
 
   const getData = async () => {
-    const scaleFetch = await fetchUserData();
+    const [scaleFetch, user] = await fetchUserData();
     const questionnaireFetch = await fetchUserAnswers();
     const dimensionSums = getSeries(scaleFetch, questionnaireFetch.answers.answers, questionnaireFetch.questionnaire.answers)
-    rankUser(dimensionSums, scaleFetch);
+    await rankUser(dimensionSums, scaleFetch, user);
   };
 
   useEffect(() => {
@@ -242,7 +266,7 @@ export default function Profile() {
                           <Button colorScheme='teal' onClick={() => {
                             const seriesString = JSON.stringify(series);
                             let text = `name=${user?.name}&serie=${seriesString}`;
-                            if(userRank){
+                            if (userRank) {
                               text += `&rank=${JSON.stringify(userRank)}`
                             }
                             const ciphertext = CryptoJS.AES.encrypt(text, secretKey).toString();
