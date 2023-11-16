@@ -22,7 +22,7 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
     isAthlete: null,
     practicesSport: null,
     competitiveLevel: null,
-    atheleteLevel: null,
+    athleteLevel: null,
     terms: false
   });
   const [showTerms, setShowTerms] = useState(false);
@@ -40,7 +40,7 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
     onChange: (e) => {
       e === 'Não' ? e = false : e = true;
       setUserData({ ...userData, practicesSport: e });
-      setUserData({ ...userData, atheleteLevel: null })
+      setUserData({ ...userData, athleteLevel: null })
     },
   });
 
@@ -51,10 +51,10 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
     },
   });
 
-  const { getRadioProps: getAtheleteLevelRadioProps } = useRadioGroup({
-    name: 'atheleteLevel',
+  const { getRadioProps: getAthleteLevelRadioProps } = useRadioGroup({
+    name: 'athleteLevel',
     onChange: (e) => {
-      setUserData({ ...userData, atheleteLevel: e });
+      setUserData({ ...userData, athleteLevel: e });
     },
   });
 
@@ -130,7 +130,7 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
                     <FormLabel>Qual nível?</FormLabel>
                     <RadioGroup display="flex" gap="10px">
                       {['Profissional', 'Amador'].map((value) => {
-                        const radio = getAtheleteLevelRadioProps({ value });
+                        const radio = getAthleteLevelRadioProps({ value });
                         return (
                           <RadioCard key={value} {...radio} x="3" y="2">
                             <Text p="0" m="0" fontSize="md">
