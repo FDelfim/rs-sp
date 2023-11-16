@@ -11,7 +11,7 @@ import RadarChart from '../../components/RadarChart';
 import useAuth from '../../hooks/useAuth';
 import CryptoJS from 'crypto-js';
 
-import { getAmateurSampleData, getQuestionnaireData, getScaleData, getUserAnswersData, getUserData, updateAmateurSampleData, updateUserData } from './_controllers/ProfileController';
+import { getAmateurSampleData, getQuestionnaireData, getScaleData, getUserAnswersData, getUserData, updateAmateurSampleData, updateUserData } from '../../Controllers/ProfileController';
 import amateurRating from '../../utils/amateurRating';
 
 const secretKey = process.env.NEXT_PUBLIC_CRYPT_KEY;

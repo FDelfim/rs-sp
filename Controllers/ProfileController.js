@@ -1,5 +1,5 @@
 import { collection, doc, getDoc, getDocs, limit, orderBy, query, updateDoc } from "firebase/firestore";
-import { db } from "../../../lib/firebase";
+import { db } from "../lib/firebase";
 
 const usersCollection = collection(db, 'users');
 const settingsCollection = collection(db, 'settings');
