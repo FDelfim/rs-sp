@@ -1,29 +1,21 @@
-const fetchAmateurRating = async () => {
-    const response = await fetch('/api/settings/amateurSample?id=amateurSample')
-    if(response.status !== 200){
-        throw new Error(response.statusText);
-    }
-    return response.json();
-}
 
 const calculateAverage = (arr) => {
     const sum = arr.reduce((acc, val) => acc + val, 0);
     return sum / arr.length;
 }
 
-const averageSample = async () => {
-    const values = await fetchAmateurRating();
-    for (const prop in values) {
-        if (Object.prototype.hasOwnProperty.call(values, prop)) {
-            const arr = values[prop];
+const averageSample = async (sample) => {
+    for (const prop in sample) {
+        if (Object.prototype.hasOwnProperty.call(sample, prop)) {
+            const arr = sample[prop];
             const avg = calculateAverage(arr);
-            values[prop] = {
+            sample[prop] = {
                 average: avg,
                 values: arr,
             };
         }
     }
-    return values;
+    return sample;
 }
 
 const standardDeviation = async (data) => {
@@ -45,19 +37,29 @@ const standardDeviation = async (data) => {
     return values;
 }
 
-export default async function amateurRating (score){
-    const value = await averageSample();
+export default async function amateurRating (score, sample, isClassified){
+    if (isClassified) {
+        for (const dimension in sample) {
+            for (const [key, value] of Object.entries(sample[dimension])) {
+                if (value === score[dimension]) {
+                    sample[dimension].splice(key, 1)
+                    break;
+                }
+            }
+        }
+    }
+    const value = await averageSample(sample, isClassified);
     const rating = await standardDeviation(value);
     const userRank = zUserScore(rating, score);
     const userScore = tUserScore(userRank, score);
     const userRanked = rankUser(userScore);
     const userRankOnly = {};
-    let sample = {};
+    let newSample = {};
     Object.keys(userRanked).forEach((key) => {
         userRankOnly[key] = userRanked[key].rank;
-        sample[key] = userRanked[key].values;
+        newSample[key] = userRanked[key].values;
     })
-    return [userRankOnly, sample];
+    return [userRankOnly, newSample];
 }
 
 const zUserScore = (rating, score) => {

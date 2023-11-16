@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Layout from '../components/Layout'
-import { Box, Flex, Button, Heading, Link, Text, Badge, useToast, Skeleton } from '@chakra-ui/react'
+import { Box, Flex, Button, Heading, Link, Text, Badge, useToast, Skeleton, Divider } from '@chakra-ui/react'
 import RadarChart from './../components/RadarChart';
 import CryptoJS from 'crypto-js';
 import Footer from '../components/Footer';
@@ -98,8 +98,8 @@ export default function result() {
           </Flex>
           {(user?.name && userName == user?.name) &&
             <Flex direction={['column', 'row']} gap={['0', '50']} alignItems='center' display='flex' justifyContent='center'>
+                <Text fontSize={['md', 'xl']} fontWeight='bold' textAlign='center' mb='0'>Compartilhar resultado</Text>
               <Box display='flex' flexDirection={['row', 'column']} justifyContent='center' m='0'>
-                <Text fontSize={['md', 'xl']} fontWeight='bold' textAlign='center'>Compartilhar resultado</Text>
                 <Flex direction={['row', 'row']}>
                   <Button variant='ghost' colorScheme='green' p='0' fontSize='3xl'><Link href='whatsapp://send?text=Consegui ver o resultado da minha resiliência psicológica no esporte neste site, veja a sua também! https://rs-sp.vercel.app/'><BsWhatsapp /></Link></Button>
                   <Button variant='ghost' colorScheme='cyan' p='0' fontSize='3xl'><Link href='https://telegram.me/share/url?url=https://rs-sp.vercel.app/&text=Consegui ver o resultado da minha resiliência psicológica no esporte neste site, veja a sua também!'><BsTelegram /></Link></Button>

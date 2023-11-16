@@ -5,15 +5,70 @@ import {
 import { useEffect, useState } from 'react';
 import { InfoIcon } from '@chakra-ui/icons';
 import { BsWhatsapp, BsTwitter, BsFacebook, BsTelegram, BsLinkedin, BsShare } from 'react-icons/bs';
-import { translate, reverseTranslate, colorScale } from '../utils/translates';
-import Layout from '../components/Layout';
-import RadarChart from '../components/RadarChart';
-import useAuth from '../hooks/useAuth';
+import { translate, reverseTranslate, colorScale } from '../../utils/translates';
+import Layout from '../../components/Layout';
+import RadarChart from '../../components/RadarChart';
+import useAuth from '../../hooks/useAuth';
 import CryptoJS from 'crypto-js';
-import amateurRating from '../utils/amateurRating';
-import { storeUser } from '../services/userServices';
+
+import { getAmateurSampleData, getQuestionnaireData, getScaleData, getUserAnswersData, getUserData, updateAmateurSampleData, updateUserData } from './_controllers/ProfileController';
+import amateurRating from '../../utils/amateurRating';
 
 const secretKey = process.env.NEXT_PUBLIC_CRYPT_KEY;
+
+const rankProfessionalUser = async (dimensionSums, scale) => {
+  let userRankings = {};
+    userRankings = {};
+    for (const dimension in dimensionSums) {
+      const value = dimensionSums[dimension];
+      const dimensionScale = scale[dimension];
+      if (value >= parseFloat(dimensionScale.extremelyHigh)) {
+        userRankings[dimension] = 'Extremamente Alto';
+      } else if (value <= parseFloat(dimensionScale.high) && value > parseFloat(dimensionScale.moderate)) {
+        userRankings[dimension] = 'Alto';
+      } else if (value <= parseFloat(dimensionScale.moderate) && value > parseFloat(dimensionScale.low)) {
+        userRankings[dimension] = 'Moderado';
+      } else if (value <= parseFloat(dimensionScale.low) && value > parseFloat(dimensionScale.extremelyLow)) {
+        userRankings[dimension] = 'Baixo';
+      } else if (value <= parseFloat(dimensionScale.extremelyLow)) {
+        userRankings[dimension] = 'Extremamente Baixo';
+      } else {
+        userRankings[dimension] = 'Não classificado';
+      }
+    }
+    const sortedKeys = Object.keys(userRankings).sort();
+    const sortedUserRankings = {};
+    for (const key of sortedKeys) {
+      sortedUserRankings[key] = userRankings[key];
+    }
+    return sortedUserRankings;
+}
+
+const getDimensionSums = (dimensions, answers, questionnaire) => {
+  const dimensionSums = {};
+  const dimensionCounts = {};
+
+  dimensions.map((dimension) => {
+    dimensionSums[dimension] = 0;	
+    const dimensionTranslate = translate[dimension];
+    dimensionCounts[dimension] = questionnaire.filter(q => q.dimension === dimensionTranslate).length;
+  });
+
+  questionnaire.forEach((question) => {
+    const dimension = reverseTranslate[question.dimension];
+    const questionIndex = questionnaire.indexOf(question);
+    const answerKey = `question_${questionIndex + 1}`;
+
+    if (answers[answerKey]) {
+      const answerValue = parseInt(answers[answerKey]);
+      dimensionSums[dimension] += answerValue;
+    }
+  });
+
+  dimensionSums['total'] = Object.values(dimensionSums).reduce((a, b) => a + b) / (Object.values(dimensionSums).length - 1);
+  return dimensionSums;
+};
+
 
 export default function Profile() {
 
@@ -44,151 +99,58 @@ export default function Profile() {
     }
   }
 
-  const showToastError = () => {
-    toast({
-      title: 'Erro ao buscar dados!',
-      description: 'Tente novamente mais tarde',
-      status: 'error',
-      duration: 5000,
-      isClosable: true
-    });
-  };
-
-  const fetchJson = async (url) => {
-    const response = await fetch(url);
-    if (response.status !== 200) {
-      showToastError();
-      throw new Error(`Erro na requisição: ${response.status}`);
-    }
-    return response.json();
-  };
-
-  const getSeries = (scale, answers, questionnaire) => {
-    const dimensionSums = {};
-    const dimensionCounts = {};
-
-    for (const dimension in scale) {
-      dimensionSums[dimension] = 0;
-      const dimensionTranslate = translate[dimension];
-      dimensionCounts[dimension] = questionnaire.filter(q => q.dimension === dimensionTranslate).length;
-    }
-
-    questionnaire.forEach((question) => {
-      const dimension = reverseTranslate[question.dimension];
-      const questionIndex = questionnaire.indexOf(question);
-      const answerKey = `question_${questionIndex + 1}`;
-
-      if (answers[answerKey]) {
-        const answerValue = parseInt(answers[answerKey]);
-        dimensionSums[dimension] += answerValue;
-      }
-    });
-
-    dimensionSums['total'] = Object.values(dimensionSums).reduce((a, b) => a + b) / (Object.values(dimensionSums).length - 1);
-    setSeries(dimensionSums);
-    return dimensionSums;
-  };
-
-  const rankUser = async (dimensionSums, scale, user) => {
-    let userRankings = {};
-    if (user.atheleteLevel === 'Profissional') {
-      userRankings = {};
-      for (const dimension in dimensionSums) {
-        const value = dimensionSums[dimension];
-        const dimensionScale = scale[dimension];
-        if (value >= parseFloat(dimensionScale.extremelyHigh)) {
-          userRankings[dimension] = 'Extremamente Alto';
-        } else if (value <= parseFloat(dimensionScale.high) && value > parseFloat(dimensionScale.moderate)) {
-          userRankings[dimension] = 'Alto';
-        } else if (value <= parseFloat(dimensionScale.moderate) && value > parseFloat(dimensionScale.low)) {
-          userRankings[dimension] = 'Moderado';
-        } else if (value <= parseFloat(dimensionScale.low) && value > parseFloat(dimensionScale.extremelyLow)) {
-          userRankings[dimension] = 'Baixo';
-        } else if (value <= parseFloat(dimensionScale.extremelyLow)) {
-          userRankings[dimension] = 'Extremamente Baixo';
-        } else {
-          userRankings[dimension] = 'Não classificado';
-        }
-      }
-      const sortedKeys = Object.keys(userRankings).sort();
-      const sortedUserRankings = {};
-      for (const key of sortedKeys) {
-        sortedUserRankings[key] = userRankings[key];
-      }
-      setUserRank(sortedUserRankings);
-    }else if(user.atheleteLevel === 'Amador'){
-      if(user.classified){
-        setUserRank(user.rating);
-      }else{
-        let sample = {};
-        [userRankings, sample] = await amateurRating(dimensionSums);
-        setUserRank(userRankings);      
-        for (const dimension in sample) {
-          sample[dimension].push(dimensionSums[dimension]);
-        }
-        user.classified = true;
-        user.rating = userRankings;
-        storeUser(user, user.id);
-
-        const res = await fetch('/api/settings/amateurSample', {
-          method: 'POST',
-          body: JSON.stringify({
-            data: sample
-          })
-        })
-        console.log(res)
-      }
-    }
-  }
-
-  const fetchScale = async (level) => {
-    try {
-      const data = await fetchJson(`/api/settings/scale?id=${level}`);
-      return data;
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const fetchQuestionnaire = async (questionnaireId) => {
-    try {
-      const data = await fetchJson(`/api/questionnaires/get-questionnaire-questions?id=${questionnaireId}`);
-      return data;
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const fetchUserAnswers = async () => {
-    try {
-      const data = await fetchJson(`/api/user/get-user-answers?id=${user?.uid}`);
-      setAnswers(data.answers);
-      const questionnaire = await fetchQuestionnaire(data.answers.questionnaire);
-      return { questionnaire: questionnaire, answers: data };
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoaded(true);
-    }
-  };
-
-  const fetchUserData = async () => {
-    try {
-      const data = await fetchJson(`/api/user-data?id=${user.uid}`);
-      setUserInfo(data.user);
-      const scaleId = data.user.atheleteLevel === 'Profissional' ? 'professionalScale' : 'amateurScale';
-      const scale = await fetchScale(scaleId);
-      return [scale, data.user];
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const getData = async () => {
-    const [scaleFetch, user] = await fetchUserData();
-    const questionnaireFetch = await fetchUserAnswers();
-    const dimensionSums = getSeries(scaleFetch, questionnaireFetch.answers.answers, questionnaireFetch.questionnaire.answers)
-    await rankUser(dimensionSums, scaleFetch, user);
+
+    try{
+      const userInfoData = await getUserData(user.uid);
+  
+      if (userInfoData) {
+        const userAnswersData = await getUserAnswersData(user.uid);
+        setAnswers(userAnswersData);
+        if (userInfoData.isAthlete && userAnswersData) {
+          const querionnaireData = await getQuestionnaireData(userAnswersData.questionnaire);
+          if (userInfoData.athleteLevel === 'Profissional') {
+            const scaleData = await getScaleData('professionalScale')
+            const dimensionSumsData = getDimensionSums(Object.keys(scaleData), userAnswersData, querionnaireData);
+            const userRankData = await rankProfessionalUser(dimensionSumsData, scaleData)   
+            setUserRank(userRankData)   
+            setSeries(dimensionSumsData)
+          }else if(userInfoData.athleteLevel == 'Amador'){
+            const sampleData = await getAmateurSampleData();
+            const dimensionSumsData = getDimensionSums(Object.keys(sampleData), userAnswersData, querionnaireData);
+            const [ userRankData, newSampleData ] = await amateurRating(dimensionSumsData, sampleData, userInfoData.isClassified ?? false);
+            setUserRank(userRankData)
+            setSeries(dimensionSumsData)
+            if(!user.isClassified){
+              const updatedUserData = { ...userInfoData, isClassified: true };
+              await updateUserData(updatedUserData);
+              await updateAmateurSampleData(newSampleData);
+            }
+          }
+        }else if(userAnswersData){
+          const questionnaireData = await getQuestionnaireData(userAnswersData.questionnaire);
+          const dimensions = [...new Set(questionnaireData.map(item => reverseTranslate[item.dimension]))];
+          const dimensionSumsData = getDimensionSums(dimensions, userAnswersData, questionnaireData);
+          const rank = {};
+          Object.keys(dimensionSumsData).forEach((key) => {
+            rank[key] = dimensionSumsData[key];
+          })
+          setUserRank(rank)
+          setSeries(dimensionSumsData)
+        }
+      }
+      setUserInfo(userInfoData)
+      setIsLoaded(true)
+    }catch(error){
+      toast({
+        title: error.message,
+        description: 'Tente novamente mais tarde',
+        status: 'error',
+        duration: 5000,
+        isClosable: true
+      
+      })
+    }
   };
 
   useEffect(() => {
@@ -221,14 +183,20 @@ export default function Profile() {
                           </AccordionButton>
                         </h2>
                         <AccordionPanel pb='2'>
-                          <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Data de Nascimento:</strong> {new Date(userInfo?.birthDate?.seconds * 1000).toLocaleDateString()}</Text>
-                          <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Naturalidade:</strong> {userInfo?.birthCity}</Text>
-                          <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>E-mail:</strong> {userInfo?.email}</Text>
-                          <Flex gap='10px' justifyContent='center' p='2'>
-                            <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.isAthlete ? 'teal' : 'yellow'}>{userInfo?.isAthlete ? 'Atleta' : 'Não atleta'}</Badge> </Text>
-                            <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.practicesSport ? 'teal' : 'yellow'}>{userInfo?.practicesSport ? 'Pratica esporte' : 'Não pratica esporte'}</Badge> </Text>
-                            <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.atheleteLevel === 'Profissional' ? 'teal' : 'yellow'}>{userInfo?.atheleteLevel}</Badge></Text>
-                          </Flex>
+                          { userInfo ?
+                          <Box>
+                            <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Data de Nascimento:</strong> {new Date(userInfo?.birthDate?.seconds * 1000).toLocaleDateString()}</Text>
+                            <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Naturalidade:</strong> {userInfo?.birthCity}</Text>
+                            <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>E-mail:</strong> {userInfo?.email}</Text>
+                            <Flex gap='10px' justifyContent='center' p='2'>
+                              <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.isAthlete ? 'teal' : 'yellow'}>{userInfo?.isAthlete ? 'Atleta' : 'Não atleta'}</Badge> </Text>
+                              <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.practicesSport ? 'teal' : 'yellow'}>{userInfo?.practicesSport ? 'Pratica esporte' : 'Não pratica esporte'}</Badge> </Text>
+                              <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.athleteLevel === 'Profissional' ? 'teal' : 'yellow'}>{userInfo?.athleteLevel}</Badge></Text>
+                            </Flex>
+                          </Box>
+                          :
+                          <Text fontSize={['sm', 'md']} m='0' textAlign='center' fontWeight='500'>Não há dados cadastrados</Text>
+                          }
                         </AccordionPanel>
                       </AccordionItem>
                     </Accordion>
