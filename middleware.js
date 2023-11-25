@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
-import useAuth from './hooks/useAuth';
 
 export function middleware(req){
-    let verify = req.cookies.has('rs-sp')
+    let verify = req.cookies.get('rs-sp')
     var response = NextResponse.next()
 
     if(!verify && req.nextUrl.pathname !== '/'){

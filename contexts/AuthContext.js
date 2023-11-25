@@ -58,6 +58,7 @@ export function AuthProvider({ children }) {
         .auth()
         .signInWithPopup(new firebase.auth.GoogleAuthProvider());
       handleUser(response.user);
+      Router.push('/questions');
     } finally {
       setLoading(false);
     }

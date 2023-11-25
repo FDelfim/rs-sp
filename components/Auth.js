@@ -1,16 +1,12 @@
 import { Flex, Modal, ModalBody, ModalCloseButton, ModalContent, Heading, ModalOverlay, Button, useDisclosure, Text } from '@chakra-ui/react';
 import useAuth from '../hooks/useAuth';
-import { useRouter } from 'next/router';
 
 const AuthModal = ({ isOpen, onClose }) => {
   const { signin } = useAuth();
-  const route = useRouter();
 
   const handleSigninGoogle = () => {
     onClose();
-    signin().then(() => {
-      route.push('/questions');
-    });
+    signin();
   };
 
   return (
