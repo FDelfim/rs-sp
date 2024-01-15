@@ -6,37 +6,19 @@ import { useRouter } from 'next/router';
 import Sidebar from '../components/Sidebar';
 import Escala from '../components/settings/Escala';
 import { useToast } from '@chakra-ui/react';
+import Report from '../components/settings/Report';
 
 export default function Answers() {
 
-  const { user, loading } = useAuth();
+  // const { user, loading } = useAuth();
   const [isLoaded, setIsLoaded] = useState(false);
-  const [userInfo, setUserInfo] = useState(null);
+  // const [userInfo, setUserInfo] = useState(null);
   const toast = useToast();
   const router = useRouter();
 
   const [configPage, setConfigPage] = useState('Escala');
 
-  useEffect(() => {
-    if (!loading) {
-      getUserInfo(user).then((data) => {
-        setUserInfo(data);
-        if (data?.isSuperUser) {
-          setUserInfo(data);
-          setIsLoaded(true);
-        } else {
-          toast({
-            title: 'Você não possui permissão para acessar esta página!',
-            status: 'error',
-            duration: 3000,
-            isClosable: true,
-          });
-          router.push('/');
-        }
-      }
-      );
-    }
-  }, [loading]);
+
 
 
   return (
@@ -46,7 +28,7 @@ export default function Answers() {
           <Escala/>
         }
         {configPage == 'Relatórios' &&
-          <>Relatórios</>
+          <Report/>
         }
       </Sidebar>
     </Layout>

@@ -3,7 +3,7 @@ import theme from '../styles/theme';
 import Head from 'next/head';
 import { ChakraProvider, extendTheme, CSSReset } from '@chakra-ui/react';
 import { Global, css } from '@emotion/react';
-import { AuthProvider } from '../contexts/AuthContext';
+import { SessionProvider } from 'next-auth/react';
 
 const myTheme = extendTheme(theme)
 
@@ -30,13 +30,13 @@ const GlobalStyle = ({ children }) => (
   </>
 );
 
-export default function App({ Component, pageProps }) {
+export default function App({ Component, pageProps: { session, ...pageProps } }) {
   return (
     <ChakraProvider theme={myTheme}>
-      <AuthProvider>
+      <SessionProvider session={session}>
         <GlobalStyle />
         <Component {...pageProps} />
-      </AuthProvider>
+      </SessionProvider>
     </ChakraProvider>
   )
 }

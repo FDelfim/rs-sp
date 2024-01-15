@@ -5,74 +5,23 @@ import {
 import { useEffect, useState } from 'react';
 import { InfoIcon } from '@chakra-ui/icons';
 import { BsWhatsapp, BsTwitter, BsFacebook, BsTelegram, BsLinkedin, BsShare } from 'react-icons/bs';
-import { translate, reverseTranslate, colorScale } from '../../utils/translates';
-import Layout from '../../components/Layout';
-import RadarChart from '../../components/RadarChart';
-import useAuth from '../../hooks/useAuth';
+import { translate, reverseTranslate, colorScale } from '../utils/translates';
+import Layout from '../components/Layout';
+import RadarChart from '../components/RadarChart';
 import CryptoJS from 'crypto-js';
 
-import { getAmateurSampleData, getQuestionnaireData, getScaleData, getUserAnswersData, getUserData, updateAmateurSampleData, updateUserData } from '../../Controllers/ProfileController';
-import amateurRating from '../../utils/amateurRating';
+import { getAmateurSampleData, getQuestionnaireData, getScaleData, getUserAnswersData, getUserData, updateAmateurSampleData, updateUserData } from '../Controllers/ProfileController';
+import amateurRating from '../utils/amateurRating';
+import { useSession } from 'next-auth/react';
+import { rankProfessionalUser } from '../utils/rating/professional';
+import { rankAmateurUser } from '../utils/rating/amateur';
+import { storeUser } from '../services/userServices';
 
 const secretKey = process.env.NEXT_PUBLIC_CRYPT_KEY;
 
-const rankProfessionalUser = async (dimensionSums, scale) => {
-  let userRankings = {};
-    userRankings = {};
-    for (const dimension in dimensionSums) {
-      const value = dimensionSums[dimension];
-      const dimensionScale = scale[dimension];
-      if (value >= parseFloat(dimensionScale.extremelyHigh)) {
-        userRankings[dimension] = 'Extremamente Alto';
-      } else if (value <= parseFloat(dimensionScale.high) && value > parseFloat(dimensionScale.moderate)) {
-        userRankings[dimension] = 'Alto';
-      } else if (value <= parseFloat(dimensionScale.moderate) && value > parseFloat(dimensionScale.low)) {
-        userRankings[dimension] = 'Moderado';
-      } else if (value <= parseFloat(dimensionScale.low) && value > parseFloat(dimensionScale.extremelyLow)) {
-        userRankings[dimension] = 'Baixo';
-      } else if (value <= parseFloat(dimensionScale.extremelyLow)) {
-        userRankings[dimension] = 'Extremamente Baixo';
-      } else {
-        userRankings[dimension] = 'Não classificado';
-      }
-    }
-    const sortedKeys = Object.keys(userRankings).sort();
-    const sortedUserRankings = {};
-    for (const key of sortedKeys) {
-      sortedUserRankings[key] = userRankings[key];
-    }
-    return sortedUserRankings;
-}
-
-const getDimensionSums = (dimensions, answers, questionnaire) => {
-  const dimensionSums = {};
-  const dimensionCounts = {};
-
-  dimensions.map((dimension) => {
-    dimensionSums[dimension] = 0;	
-    const dimensionTranslate = translate[dimension];
-    dimensionCounts[dimension] = questionnaire.filter(q => q.dimension === dimensionTranslate).length;
-  });
-
-  questionnaire.forEach((question) => {
-    const dimension = reverseTranslate[question.dimension];
-    const questionIndex = questionnaire.indexOf(question);
-    const answerKey = `question_${questionIndex + 1}`;
-
-    if (answers[answerKey]) {
-      const answerValue = parseInt(answers[answerKey]);
-      dimensionSums[dimension] += answerValue;
-    }
-  });
-
-  dimensionSums['total'] = Object.values(dimensionSums).reduce((a, b) => a + b) / (Object.values(dimensionSums).length - 1);
-  return dimensionSums;
-};
-
-
 export default function Profile() {
 
-  const { user } = useAuth();
+  const { data: session } = useSession();
   const toast = useToast();
   const { isOpen: info, onToggle: onInfo } = useDisclosure();
 
@@ -99,65 +48,13 @@ export default function Profile() {
     }
   }
 
-  const getData = async () => {
-
-    try{
-      const userInfoData = await getUserData(user.uid);
-  
-      if (userInfoData) {
-        const userAnswersData = await getUserAnswersData(user.uid);
-        setAnswers(userAnswersData);
-        if (userInfoData.isAthlete && userAnswersData) {
-          const querionnaireData = await getQuestionnaireData(userAnswersData.questionnaire);
-          if (userInfoData.athleteLevel === 'Profissional') {
-            const scaleData = await getScaleData('professionalScale')
-            const dimensionSumsData = getDimensionSums(Object.keys(scaleData), userAnswersData, querionnaireData);
-            const userRankData = await rankProfessionalUser(dimensionSumsData, scaleData)   
-            setUserRank(userRankData)   
-            setSeries(dimensionSumsData)
-          }else if(userInfoData.athleteLevel == 'Amador'){
-            const sampleData = await getAmateurSampleData();
-            const dimensionSumsData = getDimensionSums(Object.keys(sampleData), userAnswersData, querionnaireData);
-            const [ userRankData, newSampleData ] = await amateurRating(dimensionSumsData, sampleData, userInfoData.isClassified ?? false);
-            setUserRank(userRankData)
-            setSeries(dimensionSumsData)
-            if(!user.isClassified){
-              const updatedUserData = { ...userInfoData, isClassified: true };
-              await updateUserData(updatedUserData);
-              await updateAmateurSampleData(newSampleData);
-            }
-          }
-        }else if(userAnswersData){
-          const questionnaireData = await getQuestionnaireData(userAnswersData.questionnaire);
-          const dimensions = [...new Set(questionnaireData.map(item => reverseTranslate[item.dimension]))];
-          const dimensionSumsData = getDimensionSums(dimensions, userAnswersData, questionnaireData);
-          const rank = {};
-          Object.keys(dimensionSumsData).forEach((key) => {
-            rank[key] = dimensionSumsData[key];
-          })
-          setUserRank(rank)
-          setSeries(dimensionSumsData)
-        }
-      }
-      setUserInfo(userInfoData)
-      setIsLoaded(true)
-    }catch(error){
-      toast({
-        title: error.message,
-        description: 'Tente novamente mais tarde',
-        status: 'error',
-        duration: 5000,
-        isClosable: true
-      
-      })
-    }
-  };
-
   useEffect(() => {
-    if (user && !isLoaded) {
+    if (session?.user.data.userData) {
       getData();
+    } else {
+      setIsLoaded(true)
     }
-  }, [user?.uid]);
+  }, [session?.user.userId]);
 
   return (
     <>
@@ -166,11 +63,11 @@ export default function Profile() {
           <Flex justifyContent='center'>
             <Box align='center' flexDirection={['column', 'column']} gap='4' p='3' w={['90%', '90%', '25vw']} minH={['', '', '80vh']} me={['', '', '5']}>
               <Skeleton isLoaded={isLoaded}>
-                <Avatar size='2xl' name={user?.name} src={user?.photoUrl} />
+                <Avatar size='2xl' name={session?.user.name} src={session?.user.image} />
               </Skeleton>
               <Flex flexDirection='column' w='100%' >
                 <Skeleton isLoaded={isLoaded}>
-                  <Text fontSize={['2xl', '4xl']} p='0' m='0' fontWeight='500' textAlign='center'>{user?.name}</Text>
+                  <Text fontSize={['2xl', '4xl']} p='0' m='0' fontWeight='500' textAlign='center'>{session?.user.name}</Text>
                 </Skeleton>
                 <Skeleton isLoaded={isLoaded}>
                   <Box>
@@ -183,19 +80,19 @@ export default function Profile() {
                           </AccordionButton>
                         </h2>
                         <AccordionPanel pb='2'>
-                          { userInfo ?
-                          <Box>
-                            <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Data de Nascimento:</strong> {new Date(userInfo?.birthDate?.seconds * 1000).toLocaleDateString()}</Text>
-                            <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Naturalidade:</strong> {userInfo?.birthCity}</Text>
-                            <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>E-mail:</strong> {userInfo?.email}</Text>
-                            <Flex gap='10px' justifyContent='center' p='2'>
-                              <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.isAthlete ? 'teal' : 'yellow'}>{userInfo?.isAthlete ? 'Atleta' : 'Não atleta'}</Badge> </Text>
-                              <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.practicesSport ? 'teal' : 'yellow'}>{userInfo?.practicesSport ? 'Pratica esporte' : 'Não pratica esporte'}</Badge> </Text>
-                              <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.athleteLevel === 'Profissional' ? 'teal' : 'yellow'}>{userInfo?.athleteLevel}</Badge></Text>
-                            </Flex>
-                          </Box>
-                          :
-                          <Text fontSize={['sm', 'md']} m='0' textAlign='center' fontWeight='500'>Não há dados cadastrados</Text>
+                          {userInfo ?
+                            <Box>
+                              <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Data de Nascimento:</strong> {new Date(userInfo?.birthDate?.seconds * 1000).toLocaleDateString()}</Text>
+                              <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Naturalidade:</strong> {userInfo?.birthCity}</Text>
+                              <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>E-mail:</strong> {session.user.email}</Text>
+                              <Flex gap='10px' justifyContent='center' p='2'>
+                                <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.isAthlete ? 'teal' : 'yellow'}>{userInfo?.isAthlete ? 'Atleta' : 'Não atleta'}</Badge> </Text>
+                                <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.practicesSport ? 'teal' : 'yellow'}>{userInfo?.practicesSport ? 'Pratica esporte' : 'Não pratica esporte'}</Badge> </Text>
+                                <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.athleteLevel === 'Profissional' ? 'teal' : 'yellow'}>{userInfo?.athleteLevel}</Badge></Text>
+                              </Flex>
+                            </Box>
+                            :
+                            <Text fontSize={['sm', 'md']} m='0' textAlign='center' fontWeight='500'>Não há dados cadastrados</Text>
                           }
                         </AccordionPanel>
                       </AccordionItem>
@@ -233,7 +130,7 @@ export default function Profile() {
                           }
                           <Button colorScheme='teal' onClick={() => {
                             const seriesString = JSON.stringify(series);
-                            let text = `name=${user?.name}&serie=${seriesString}`;
+                            let text = `name=${session?.user.name}&serie=${seriesString}`;
                             if (userRank) {
                               text += `&rank=${JSON.stringify(userRank)}`
                             }

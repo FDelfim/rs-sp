@@ -3,13 +3,11 @@ import {
   FormControl, Input, FormLabel, Text, useRadioGroup, Flex, RadioGroup, Modal, ModalContent,
   ModalOverlay, ModalBody, Heading, Button, useToast, ModalHeader, ModalFooter, Checkbox, Link, useDisclosure, Select
 } from '@chakra-ui/react';
-import useAuth from '../../hooks/useAuth';
 import RadioCard from '../RadioCard';
 import { storeUser } from '../../services/userServices';
 import TermsModal from './termsModal';
 
-export default function WelcomeModal({ isOpen, setIsOpen }) {
-  const { user } = useAuth();
+export default function WelcomeModal({ isOpen, setIsOpen, session }) {
   const toast = useToast();
 
   const { onClose } = useDisclosure();
@@ -61,8 +59,9 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const updatedUserData = { ...userData, name: user.name, email: user.email, id: user.uid };
-      await storeUser(updatedUserData, user.uid);
+      await storeUser({
+        ...{email: session.user.email, image: session.user.image, name: session.user.name, userId: session.user.userId}, 
+        userData}, session.user.userId);
       toast({
         title: 'Sucesso!',
         description: 'Seu cadastro foi realizado com sucesso!',
@@ -73,7 +72,7 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
     } catch (error) {
       toast({
         title: 'Erro!',
-        description: error,
+        description: error.toString(), // Convert the error object to a string
         status: 'error',
         duration: 5000,
         isClosable: true,
@@ -93,7 +92,7 @@ export default function WelcomeModal({ isOpen, setIsOpen }) {
           <form onSubmit={handleSubmit}>
             <ModalBody>
               <Text>
-                Olá {user?.name}, gostaríamos de te conhecer um pouco melhor. Por favor, preencha os campos abaixo:
+                Olá {session?.user.name}, gostaríamos de te conhecer um pouco melhor. Por favor, preencha os campos abaixo:
               </Text>
               <FormControl mt="3" isRequired>
                 <FormLabel>Naturalidade</FormLabel>

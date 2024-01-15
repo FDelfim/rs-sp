@@ -1,21 +1,18 @@
-import useAuth from '../hooks/useAuth';
 import withAuthModal from '../components/Auth';
 import Layout from '../components/Layout';
 import React, { useEffect, useState } from 'react';
-import Head from 'next/head';
 import Question from '../components/Question';
 import WelcomeModal from '../components/_modals/welcomeModal';
 import { db } from '../lib/firebase';
 import { collection, getDocs, query, setDoc, doc, getDoc } from 'firebase/firestore';
 import { Flex, Heading, Button, Text, Box, useToast, Slide, useDisclosure, Spinner} from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import { getUserInfo, getUserAnswers } from '../services/userServices';
+import { useSession } from 'next-auth/react';
+import { getUserAnswers } from '../services/userServices';
 
 export function Questions() {
-
-  const { user } = useAuth();
-
   const toast = useToast();
+  const {data: session, status} = useSession();
 
   const [questionnaires, setQuestionnaires] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -37,12 +34,16 @@ export function Questions() {
         for (const doc of querySnapshot.docs) {
           const questionnaire = doc.data();
           questionnaire.id = doc.id;
-      
+
           if (questionnaire.id === '1') {
             const questionsSnapshot = await getDocs(
               query(collection(db, `questionnaires/${doc.id}/questions`))
             );
-            questionnaire.questions = questionsSnapshot.docs.map((questionDoc) => questionDoc.data());
+            questionnaire.questions = questionsSnapshot.docs.map((questionDoc) => ({
+              ...questionDoc.data(),
+              id: questionDoc.id
+            }));
+            questionnaire.questions.sort((a, b) => a.id - b.id);
             questionnairesData.push(questionnaire);
           }
         }
@@ -57,42 +58,23 @@ export function Questions() {
         })
       }
     };
-
-    getUserInfo(user).then((userData) => {
-      if (userData && user && user.uid) {
-        if (user.uid) {
-          getUserAnswers(user?.uid).then((answers) => {
-            if (answers.length > 0) {
-              setResult(true);
-              setIsLoading(false);
-            }else{
-              setIsLoading(false);
-            }
-          }).catch((error) => {
-            toast({
-              title: 'Erro ao buscar respostas',
-              description: 'Erro ao buscar respostas do usuário',
-              status: 'error',
-              duration: 5000,
-              isClosable: true,
-            })
-          })
-        }
-      } else if(!userData) {
-        setIsOpen(true);
-        setIsLoading(false);
-      }
-    }).catch((error) => {
-      toast({
-        title: 'Erro ao buscar usuário',
-        description: 'Não foi possível buscar o usuário',
-        status: 'error',
-        duration: 5000,
-        isClosable: true,
-      })
-    })
     fetchQuestionnaires();
-  }, [user])
+    if(!(session?.user.data.userData && status !== 'loading')){
+      setIsOpen(true);
+      setIsLoading(false);
+    }else{
+      setIsLoading(false);
+      setIsOpen(false)
+      if(session.user.data.userData){
+        getUserAnswers(session.user.userId).then((answers) => {
+          if(answers.length > 0){
+            setResult(true);
+          }
+        }
+        )
+      }
+    }
+  }, [status])
 
   const appendOption = (value, index) => {
     const questionExists = answers.find((answer) => answer.question === currentQuestion + 1);
@@ -108,10 +90,10 @@ export function Questions() {
   const redirectResult = () => {
     async function saveAnswers() {
       try {
-        const userRef = doc(db, 'users', user?.uid);
+        const userRef = doc(db, 'users', session.user.userId);
         const userDoc = await getDoc(userRef);
         if (userDoc.exists()) {
-          const answersRef = collection(db, 'users', user?.uid, 'answers');
+          const answersRef = collection(db, 'users', session.user.userId, 'answers');
           const answersQuerySnapshot = await getDocs(answersRef);
           if (answersQuerySnapshot.empty) {
             const data = answers.reduce((acc, answer) => {
@@ -187,7 +169,7 @@ export function Questions() {
           </Box>
           ))
           }
-          <WelcomeModal isOpen={isOpen} setIsOpen={setIsOpen} />
+          <WelcomeModal isOpen={isOpen} setIsOpen={setIsOpen} session={session}/>
         </Box >
         :
         <Box p='2' mx={[4, 8]} >

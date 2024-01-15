@@ -1,12 +1,11 @@
 import { Flex, Modal, ModalBody, ModalCloseButton, ModalContent, Heading, ModalOverlay, Button, useDisclosure, Text } from '@chakra-ui/react';
-import useAuth from '../hooks/useAuth';
+import { signIn }  from 'next-auth/react';
 
 const AuthModal = ({ isOpen, onClose }) => {
-  const { signin } = useAuth();
 
   const handleSigninGoogle = () => {
     onClose();
-    signin();
+    signIn('google');
   };
 
   return (

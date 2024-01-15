@@ -108,6 +108,9 @@ export default function Escala() {
         fetchAmateurScale();
     }, [])
 
+    const bgColor = useColorModeValue('white', 'gray.800');
+    const bgSecondary = useColorModeValue('white.50', 'gray.700');
+
     return (
         <Box m={['2']}>
             <Box bgColor={'teal.500'} color={'#fff'} p='5' borderRadius={'md'} boxShadow={'sm'}>
@@ -115,7 +118,7 @@ export default function Escala() {
                     <FiTrendingUp size={'35'} /><Text my='0' fontSize={'2xl'} ps='2'>Escala</Text>
                 </Flex>
             </Box>
-            <Accordion defaultIndex={[0]} allowMultiple backgroundColor='#ffffff' mt='3'  mx='40' boxShadow={'md'}>
+            <Accordion defaultIndex={[0]} allowMultiple backgroundColor={bgColor} mt='3' mx={['', '' ,'10%']} boxShadow={'md'}>
                 <AccordionItem>
                     <AccordionButton>
                         <Box as="span" flex='1' textAlign='left'>
@@ -124,7 +127,7 @@ export default function Escala() {
                         <AccordionIcon />
                     </AccordionButton>
                     <form onSubmit={handleSubmit('professionalScale')}>
-                        <AccordionPanel pt='0' backgroundColor='#ffffff'>
+                        <AccordionPanel pt='0' backgroundColor={bgSecondary}>
                             {
                                 dimensions.map((dimension) => (
                                     <Box key={dimension.value}>
@@ -138,44 +141,6 @@ export default function Escala() {
                                                             <Input value={professionalScale[dimension.value][range.value]}
                                                                 type='number' placeholder='e.g. 9,2' onChange={(e) => {
                                                                     setProfessionalScale({ ...professionalScale, [dimension.value]: { ...professionalScale[dimension.value], [range.value]: e.target.value } })
-                                                                }} />
-                                                        </FormControl>
-                                                    </GridItem>
-                                                ))
-                                            }
-                                        </Grid>
-                                        <Divider my='4' />
-                                    </Box>
-                                ))
-                            }
-                            <Button type="submit" w='100%' colorScheme='teal' size='sm'>Salvar</Button>
-                        </AccordionPanel>
-                    </form>
-                </AccordionItem>
-            </Accordion>
-            <Accordion defaultIndex={[0]} allowMultiple backgroundColor='#ffffff' mt='3' boxShadow={'md'} mx='40'>
-                <AccordionItem>
-                    <AccordionButton>
-                        <Box as="span" flex='1' textAlign='left'>
-                            <Text fontSize={'2xl'} fontWeight='bold'>Escala para atletas amadores</Text>
-                        </Box>
-                        <AccordionIcon />
-                    </AccordionButton>
-                    <form onSubmit={handleSubmit('amateurScale')}>
-                        <AccordionPanel pt='0' backgroundColor='#ffffff'>
-                            {
-                                dimensions.map((dimension) => (
-                                    <Box key={dimension.value}>
-                                        <Text fontSize={'xl'}>{dimension.name}</Text>
-                                        <Grid templateColumns={['repeat(2, 1fr)', 'repeat(3, 1fr)', 'repeat(5, 1fr)']} gap='4'>
-                                            {
-                                                ranges.map((range) => (
-                                                    <GridItem key={range.value}>
-                                                        <FormControl>
-                                                            <FormLabel>{range.name}</FormLabel>
-                                                            <Input value={amateurScale[dimension.value][range.value]}
-                                                                type='number' placeholder='e.g. 9,2' onChange={(e) => {
-                                                                    setAmateurScale({ ...amateurScale, [dimension.value]: { ...amateurScale[dimension.value], [range.value]: e.target.value } })
                                                                 }} />
                                                         </FormControl>
                                                     </GridItem>

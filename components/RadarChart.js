@@ -9,9 +9,10 @@ export default function RadarChart(props) {
   const valores = props.series;
 
   const colorMode = useColorModeValue('light', 'dark');
-  const labelColor = colorMode === 'light' ? '#263238' : '#ffffff';
-  const primaryRadarColor = colorMode === 'light' ? '#e9e9e9' : '#999999';
-  const secondaryRadarColor = colorMode === 'light' ? '#ffffff' : '#5e6572';
+  const labelColor = colorMode === 'light' ? '#263238' : '#dfdfdf';
+  const primaryRadarColor = colorMode === 'light' ? '#e9e9e9' : '#000000';
+  const secondaryRadarColor = colorMode === 'light' ? '#ffffff' : '#2f2f2f';
+  const strokeColor = colorMode === 'light' ? '#e9e9e9' : '#000000';
 
   const [keysValues, setKeysValues] = useState([]);
 
@@ -30,7 +31,7 @@ export default function RadarChart(props) {
     plotOptions: {
       radar: {
         polygons: {
-          strokeColor: '#e9e9e9',
+          strokeColor: strokeColor,
           fill: {
             colors: [primaryRadarColor, secondaryRadarColor],
           },
@@ -71,7 +72,7 @@ export default function RadarChart(props) {
     },
     markers: {
       colors: ['#319795'],
-      strokeColors: '#fff',
+      strokeColors: strokeColor,
       strokeWidth: 2,
     },
     dataLabels: {

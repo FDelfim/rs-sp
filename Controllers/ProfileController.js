@@ -5,21 +5,65 @@ const usersCollection = collection(db, 'users');
 const settingsCollection = collection(db, 'settings');
 const questionnairesCollection = collection(db, 'questionnaires');
 
-export const getUserData = async (id) => {
-    try {
-        const docRef = doc(usersCollection, id);
-        const userDoc = await getDoc(docRef);
-        if (!userDoc.exists()) {
-            return null;
+const rankUser = (dimensionSums, scale) => {
+    let userRankings = {};
+    for (const dimension in dimensionSums) {
+        const value = dimensionSums[dimension];
+        const dimensionScale = scale[dimension];
+        if (dimensionScale) {
+            if (value >= parseFloat(dimensionScale.extremelyHigh)) {
+                userRankings[dimension] = 'Extremamente Alto';
+            } else if (value <= parseFloat(dimensionScale.high) && value > parseFloat(dimensionScale.moderate)) {
+                userRankings[dimension] = 'Alto';
+            } else if (value <= parseFloat(dimensionScale.moderate) && value > parseFloat(dimensionScale.low)) {
+                userRankings[dimension] = 'Moderado';
+            } else if (value <= parseFloat(dimensionScale.low) && value > parseFloat(dimensionScale.extremelyLow)) {
+                userRankings[dimension] = 'Baixo';
+            } else if (value <= parseFloat(dimensionScale.extremelyLow)) {
+                userRankings[dimension] = 'Extremamente Baixo';
+            } else {
+                userRankings[dimension] = 'Não classificado';
+            }
         } else {
-            return userDoc.data();
+            userRankings[dimension] = 'Não classificado';
         }
-    } catch (error) {
-        throw error;
     }
+    const sortedKeys = Object.keys(userRankings).sort();
+    const sortedUserRankings = {};
+    for (const key of sortedKeys) {
+        sortedUserRankings[key] = userRankings[key];
+    }
+    return sortedUserRankings;
 }
 
-export const getUserAnswersData = async (id) => {
+export const dimensionsSums = (dimensions, answers, questionnaire) => {
+    const dimensionSums = {};
+    const dimensionCounts = {};
+
+    dimensions.map((dimension) => {
+      dimensionSums[dimension] = 0;	
+      let dimensionTranslate = translate[dimension];
+      dimensionCounts[dimension] = questionnaire.filter(q => q.dimension === dimensionTranslate).length;
+    });
+
+    console.log(dimensionCounts);
+
+    questionnaire.forEach((question) => {
+      const dimension = reverseTranslate[question.dimension];
+      const questionIndex = questionnaire.indexOf(question);
+      const answerKey = `question_${questionIndex + 1}`;
+
+      if (answers[answerKey]) {
+        const answerValue = parseInt(answers[answerKey]);
+        dimensionSums[dimension] += answerValue;
+      }
+    });
+
+    dimensionSums['total'] = Object.values(dimensionSums).reduce((a, b) => a + b) / (Object.values(dimensionSums).length - 1);
+    return dimensionSums;
+}
+
+const getUserAnswers = async (id) => {
     try {
         const userDocRef = doc(usersCollection, id);
         const answersCollectionRef = collection(userDocRef, 'answers');
@@ -36,7 +80,7 @@ export const getUserAnswersData = async (id) => {
     }
 }
 
-export const getScaleData = async (id) => {
+const getScale = async (id) => {
     try {
         const docRef = doc(settingsCollection, id);
         const scaleDoc = await getDoc(docRef);
@@ -50,7 +94,7 @@ export const getScaleData = async (id) => {
     }
 }
 
-export const getAmateurSampleData = async () => {
+const getAmateurSample = async () => {
     try{
         const docRef = doc(settingsCollection, 'amateurSample');
         const amateurSampleDoc = await getDoc(docRef);
@@ -64,7 +108,7 @@ export const getAmateurSampleData = async () => {
     }
 }
 
-export const getQuestionnaireData = async (id) => {
+const getQuestionnaire = async (id) => {
     try {
         const questionnaireDocRef = doc(questionnairesCollection, id);
         const answersCollectionRef = collection(questionnaireDocRef, 'questions');
@@ -86,7 +130,7 @@ export const getQuestionnaireData = async (id) => {
     }
 }
 
-export const updateUserData = async (user) => {
+const updateUser = async (user) => {
     try {
         const docRef = doc(usersCollection, user.id);
         await updateDoc(docRef, user);
@@ -95,11 +139,33 @@ export const updateUserData = async (user) => {
     }
 }
 
-export const updateAmateurSampleData = async (sample) => {
+const updateAmateurSample = async (sample) => {
     try {
         const docRef = doc(settingsCollection, 'amateurSample');
         await updateDoc(docRef, sample);
     } catch (error) {
+        throw error;
+    }
+}
+
+export const userRating = async (user) => {
+    try{
+        const userData = user.data.userData;
+        const answers = await getUserAnswers(user.userId);
+        const questionnaire = await getQuestionnaire(answers.questionnaire);
+
+        if(userData.isAthlete && answers){
+            if(userData.athleteLevel === 'Profissional'){
+                const scale = await getScale('professionalScale');
+                const sums = dimensionsSums(Object.keys(scale), answers, questionnaire);
+                const userRank = rankUser(sums, scale);
+                return {userRank, sums, answers};
+            }else{
+                
+            }
+        }
+
+    }catch(error){
         throw error;
     }
 }

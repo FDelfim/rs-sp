@@ -2,28 +2,19 @@ import Link from 'next/link';
 import { Flex, useColorMode, useColorModeValue, Button, Avatar, Divider,
   Menu, MenuButton, MenuList, MenuItem, Heading, useToast } from '@chakra-ui/react';
 import { MoonIcon, SunIcon, CheckIcon, SettingsIcon } from '@chakra-ui/icons';
-import useAuth from '../hooks/useAuth';
 import withAuthModal from './Auth';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-import { getUserInfo } from '../services/userServices';
+import { signOut, signIn, useSession } from 'next-auth/react';
 
 export function Nav({ openAuthModal }) {
 
   const router = useRouter();
+  const {data: session} = useSession();
 
-  const { user, signout } = useAuth();
   const { colorMode, toggleColorMode } = useColorMode();
   const bgColor = useColorModeValue('#FFFFFF', '#1A202C');
   const color = useColorModeValue('#1A202C', '#EDEEEE');
   const borderColor = useColorModeValue('#DDD', '#27272A');
-  const [ userInfo, setUserInfo ] = useState({});
-
-  useEffect(()=>{
-    getUserInfo(user).then((result) => {
-      setUserInfo(result);
-    })
-  }, [user])
 
   return (
     <>
@@ -38,15 +29,15 @@ export function Nav({ openAuthModal }) {
             <Link className={router.pathname == "/about" ? 'nav-link active' : 'nav-link'} href='about'>Sobre</Link>
           </Flex>
           <Flex justifyContent="center" alignItems="center">
-            {user ? (
+            {session ? (
                 <>
                   <Menu>
-                    <MenuButton as={Avatar} mr={6} name={user.name} src={user.photoUrl} size="sm" cursor='pointer'/>
+                    <MenuButton as={Avatar} mr={6} name={session.user.name} src={session.user.image} size="sm" cursor='pointer'/>
                     <MenuList>
                       <MenuItem onClick={() => router.push('/profile')}>Perfil</MenuItem>
-                      <MenuItem onClick={() => signout()}>Sair</MenuItem>
+                      <MenuItem onClick={() => signOut()}>Sair</MenuItem>
                       <Divider orientation='horizontal' p='0' m='0'/>
-                      { userInfo?.isSuperUser && <MenuItem textColor='teal.500' onClick={() => router.push('/settings')}><CheckIcon me='1'/>Área Super Usuário</MenuItem> }
+                      <MenuItem textColor='teal.500' onClick={() => router.push('/settings')}><CheckIcon me='1'/>Área Super Usuário</MenuItem> 
                     </MenuList>
                   </Menu>
                 </>
