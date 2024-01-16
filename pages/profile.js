@@ -4,18 +4,13 @@ import {
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
 import { InfoIcon } from '@chakra-ui/icons';
-import { BsWhatsapp, BsTwitter, BsFacebook, BsTelegram, BsLinkedin, BsShare } from 'react-icons/bs';
+import { BsWhatsapp, BsTwitter, BsFacebook, BsTelegram, BsShare } from 'react-icons/bs';
 import { translate, reverseTranslate, colorScale } from '../utils/translates';
 import Layout from '../components/Layout';
 import RadarChart from '../components/RadarChart';
 import CryptoJS from 'crypto-js';
-
-import { getAmateurSampleData, getQuestionnaireData, getScaleData, getUserAnswersData, getUserData, updateAmateurSampleData, updateUserData } from '../Controllers/ProfileController';
-import amateurRating from '../utils/amateurRating';
 import { useSession } from 'next-auth/react';
-import { rankProfessionalUser } from '../utils/rating/professional';
-import { rankAmateurUser } from '../utils/rating/amateur';
-import { storeUser } from '../services/userServices';
+import { userRating } from '../Controllers/ProfileController';
 
 const secretKey = process.env.NEXT_PUBLIC_CRYPT_KEY;
 
@@ -49,9 +44,20 @@ export default function Profile() {
   }
 
   useEffect(() => {
+
+    async function rateUser(){
+      const {userRank, sums, answers} = await userRating(session.user);
+      const userInfo = session.user.data.userData;
+      setUserInfo(userInfo);
+      setAnswers(answers);
+      setSeries(sums);
+      setUserRank(userRank);
+    }
+
     if (session?.user.data.userData) {
-      getData();
-    } else {
+      rateUser();
+      setIsLoaded(true)
+    } else if(session?.user.userId){
       setIsLoaded(true)
     }
   }, [session?.user.userId]);
@@ -170,9 +176,6 @@ export default function Profile() {
             }
           </Flex>
         </Flex>
-        {
-
-        }
       </Layout>
     </>
   )

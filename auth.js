@@ -20,8 +20,8 @@ export const options = {
         })
     }),
     callbacks: {
-      async jwt({ token, user }) {
-        if(token){
+      async jwt({ token, user, account, trigger }) {
+        if((account && user) || trigger === 'update'){
           let docRef = doc(db, 'users', token.sub);
           let docSnap = await getDoc(docRef);
           if (docSnap.exists()) {

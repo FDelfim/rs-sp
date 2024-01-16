@@ -59,7 +59,7 @@ export default async function amateurRating (score, sample, isClassified){
         userRankOnly[key] = userRanked[key].rank;
         newSample[key] = userRanked[key].values;
     })
-    return [userRankOnly, newSample];
+    return {userRankOnly, newSample};
 }
 
 const zUserScore = (rating, score) => {

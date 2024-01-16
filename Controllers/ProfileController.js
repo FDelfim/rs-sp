@@ -1,5 +1,8 @@
 import { collection, doc, getDoc, getDocs, limit, orderBy, query, updateDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import amateurRating from '../utils/amateurRating';
+import { translate, reverseTranslate, colorScale } from '../utils/translates';
+
 
 const usersCollection = collection(db, 'users');
 const settingsCollection = collection(db, 'settings');
@@ -45,8 +48,6 @@ export const dimensionsSums = (dimensions, answers, questionnaire) => {
       let dimensionTranslate = translate[dimension];
       dimensionCounts[dimension] = questionnaire.filter(q => q.dimension === dimensionTranslate).length;
     });
-
-    console.log(dimensionCounts);
 
     questionnaire.forEach((question) => {
       const dimension = reverseTranslate[question.dimension];
@@ -152,6 +153,7 @@ export const userRating = async (user) => {
     try{
         const userData = user.data.userData;
         const answers = await getUserAnswers(user.userId);
+        if(!answers) return {userRank: null, sums: null, answers: null}
         const questionnaire = await getQuestionnaire(answers.questionnaire);
 
         if(userData.isAthlete && answers){
@@ -161,10 +163,22 @@ export const userRating = async (user) => {
                 const userRank = rankUser(sums, scale);
                 return {userRank, sums, answers};
             }else{
-                
+                const sample = await getAmateurSample();
+                const sums = dimensionsSums(Object.keys(sample), answers, questionnaire);
+                const { userRankOnly, newSample } = await amateurRating(sums, sample, userData.isClassfied ?? false);
+                console.log(newSample)
+                return { userRank: userRankOnly, sums, answers };
             }
+        }else if(answers){
+            const dimensions = [...new Set(questionnaire.map(item => reverseTranslate[item.dimension]))];
+            const sums = dimensionsSums(dimensions, answers, questionnaire);
+            const userRank = {};
+            Object.keys(sums).forEach((key) => {
+                userRank[key] = sums[key]
+            })
+            return {userRank, sums, answers};
         }
-
+        return {userRank: null, sums: null, answers: null};
     }catch(error){
         throw error;
     }

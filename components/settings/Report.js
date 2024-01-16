@@ -1,7 +1,7 @@
 import { Box, Card, Flex, FormLabel, Heading, Input, InputLeftAddon, Text, useColorModeValue, InputGroup, FormControl, Button, useToast } from '@chakra-ui/react'
 import React, { useState } from 'react'
 import { FiFileText } from 'react-icons/fi'
-import Select from 'react-select'
+import {Select} from 'chakra-react-select'
 import { getJsonReport } from '../../controllers/ReportController'
 
 const formatToReport = (userAnswers) => {

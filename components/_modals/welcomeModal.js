@@ -7,7 +7,7 @@ import RadioCard from '../RadioCard';
 import { storeUser } from '../../services/userServices';
 import TermsModal from './termsModal';
 
-export default function WelcomeModal({ isOpen, setIsOpen, session }) {
+export default function WelcomeModal({ isOpen, setIsOpen, session, update }) {
   const toast = useToast();
 
   const { onClose } = useDisclosure();
@@ -56,6 +56,19 @@ export default function WelcomeModal({ isOpen, setIsOpen, session }) {
     },
   });
 
+  async function updateSession(userData){
+    await update({
+      ...session,
+      user: {
+        ...session.user,
+        data: {
+          ...session.user.data,
+          userData: userData
+        }
+      }
+    })
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -69,10 +82,11 @@ export default function WelcomeModal({ isOpen, setIsOpen, session }) {
         duration: 5000,
         isClosable: true,
       });
+      await updateSession(userData);
     } catch (error) {
       toast({
         title: 'Erro!',
-        description: error.toString(), // Convert the error object to a string
+        description: error.toString(),
         status: 'error',
         duration: 5000,
         isClosable: true,

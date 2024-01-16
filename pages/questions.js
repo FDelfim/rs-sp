@@ -12,7 +12,7 @@ import { getUserAnswers } from '../services/userServices';
 
 export function Questions() {
   const toast = useToast();
-  const {data: session, status} = useSession();
+  const {data: session, status, update} = useSession();
 
   const [questionnaires, setQuestionnaires] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -169,7 +169,7 @@ export function Questions() {
           </Box>
           ))
           }
-          <WelcomeModal isOpen={isOpen} setIsOpen={setIsOpen} session={session}/>
+          <WelcomeModal isOpen={isOpen} setIsOpen={setIsOpen} session={session} update={update}/>
         </Box >
         :
         <Box p='2' mx={[4, 8]} >
