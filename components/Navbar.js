@@ -10,7 +10,7 @@ export function Nav({ openAuthModal }) {
 
   const router = useRouter();
   const {data: session} = useSession();
-  
+
   const { colorMode, toggleColorMode } = useColorMode();
   const bgColor = useColorModeValue('#FFFFFF', '#1A202C');
   const color = useColorModeValue('#1A202C', '#EDEEEE');

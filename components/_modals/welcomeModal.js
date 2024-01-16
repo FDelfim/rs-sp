@@ -56,25 +56,13 @@ export default function WelcomeModal({ isOpen, setIsOpen, session, update }) {
     },
   });
 
-  async function updateSession(userData){
-    await update({
-      ...session,
-      user: {
-        ...session.user,
-        data: {
-          ...session.user.data,
-          userData: userData
-        }
-      }
-    })
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await storeUser({
-        ...{email: session.user.email, image: session.user.image, name: session.user.name, userId: session.user.userId}, 
-        userData}, session.user.userId);
+        ...{...session.user, ...userData
+        }}, session.user.userId);
       toast({
         title: 'Sucesso!',
         description: 'Seu cadastro foi realizado com sucesso!',
@@ -82,7 +70,7 @@ export default function WelcomeModal({ isOpen, setIsOpen, session, update }) {
         duration: 5000,
         isClosable: true,
       });
-      await updateSession(userData);
+      await update();
     } catch (error) {
       toast({
         title: 'Erro!',

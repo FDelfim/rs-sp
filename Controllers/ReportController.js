@@ -1,15 +1,21 @@
 import { db } from '../lib/firebase';
-import { collection, getDocs, query, where, orderBy, limit, Timestamp } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy, limit, Timestamp, or } from 'firebase/firestore';
 
 const usersCollection = collection(db, 'users');
 
 export const getJsonReport = async (data) => {
   try {
-    const usersQuery = query(usersCollection, where('athleteLevel', 'in', data.tipo));
-    const usersSnapshot = await getDocs(usersQuery);
-    let usersAnswers = [];
+    if (data.tipo.includes('null')) {
+      data.tipo = data.tipo.map((t) => (t === 'null' ? null : t));
+    }
 
-    await Promise.all(
+    let usersQuery = query(usersCollection, where('athleteLevel', 'in', data.tipo));
+    if (data.tipo.includes(null)) {
+      usersQuery = query(usersCollection, or(where('athleteLevel', '==', null), where('athleteLevel', 'in', data.tipo)));
+    }
+    const usersSnapshot = await getDocs(usersQuery);
+
+    const usersAnswers = await Promise.allSettled(
       usersSnapshot.docs.map(async (userDoc) => {
         const answersCollectionQuery = query(
           collection(db, 'users', userDoc.id, 'answers'),
@@ -20,14 +26,13 @@ export const getJsonReport = async (data) => {
         );
 
         const answersSnapshot = await getDocs(answersCollectionQuery);
-        usersAnswers.push({
-          user: userDoc.data(),
-          answers: answersSnapshot.docs.map((doc) => doc.data()),
-        });
+
+        const answers = answersSnapshot.docs.map((doc) => doc.data());
+        return { user: userDoc.data(), answers };
       })
     );
 
-    return usersAnswers;
+    return usersAnswers.map((result) => result.value);
   } catch (error) {
     throw error;
   }

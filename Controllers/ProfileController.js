@@ -151,7 +151,7 @@ const updateAmateurSample = async (sample) => {
 
 export const userRating = async (user) => {
     try{
-        const userData = user.data.userData;
+        const userData = user;
         const answers = await getUserAnswers(user.userId);
         if(!answers) return {userRank: null, sums: null, answers: null}
         const questionnaire = await getQuestionnaire(answers.questionnaire);

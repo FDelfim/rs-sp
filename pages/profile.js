@@ -47,14 +47,14 @@ export default function Profile() {
 
     async function rateUser(){
       const {userRank, sums, answers} = await userRating(session.user);
-      const userInfo = session.user.data.userData;
+      const userInfo = session.user;
       setUserInfo(userInfo);
       setAnswers(answers);
       setSeries(sums);
       setUserRank(userRank);
     }
 
-    if (session?.user.data.userData) {
+    if (session?.user.lastAnswer) {
       rateUser();
       setIsLoaded(true)
     } else if(session?.user.userId){
@@ -89,8 +89,8 @@ export default function Profile() {
                           {userInfo ?
                             <Box>
                               <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Data de Nascimento:</strong> {new Date(userInfo?.birthDate?.seconds * 1000).toLocaleDateString()}</Text>
-                              <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Naturalidade:</strong> {userInfo?.birthCity}</Text>
-                              <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>E-mail:</strong> {session.user.email}</Text>
+                              <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Naturalidade:</strong> {userInfo.birthCity}</Text>
+                              <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>E-mail:</strong> {userInfo.email}</Text>
                               <Flex gap='10px' justifyContent='center' p='2'>
                                 <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.isAthlete ? 'teal' : 'yellow'}>{userInfo?.isAthlete ? 'Atleta' : 'Não atleta'}</Badge> </Text>
                                 <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.practicesSport ? 'teal' : 'yellow'}>{userInfo?.practicesSport ? 'Pratica esporte' : 'Não pratica esporte'}</Badge> </Text>

@@ -6,6 +6,9 @@ import { db } from './lib/firebase'
 import { getDoc, doc } from 'firebase/firestore'
 
 export const options = {
+    pages:{
+      signIn: '/',
+    },
     providers: [
       GoogleProvider({
         clientId: process.env.GOOGLE_CLIENT_ID,
@@ -32,8 +35,7 @@ export const options = {
       },
       async session({ session, token }) {
         if (session?.user){
-          session.user.userId = token.sub;
-          session.user.data = token.data;
+          session.user = {...session.user, "userId": token.sub , ...token.data};
         } 
         return session;
       },

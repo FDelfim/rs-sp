@@ -5,14 +5,14 @@ import Question from '../components/Question';
 import WelcomeModal from '../components/_modals/welcomeModal';
 import { db } from '../lib/firebase';
 import { collection, getDocs, query, setDoc, doc, getDoc } from 'firebase/firestore';
-import { Flex, Heading, Button, Text, Box, useToast, Slide, useDisclosure, Spinner} from '@chakra-ui/react';
+import { Flex, Heading, Button, Text, Box, useToast, Slide, useDisclosure, Spinner } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
-import { getUserAnswers } from '../services/userServices';
+import { getUserAnswers, storeUser } from '../services/userServices';
 
 export function Questions() {
   const toast = useToast();
-  const {data: session, status, update} = useSession();
+  const { data: session, status, update } = useSession();
 
   const [questionnaires, setQuestionnaires] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -20,8 +20,9 @@ export function Questions() {
   const [result, setResult] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [answered, setAnswered] = useState(false);
 
-  const {isOpen : info, onToggle : onInfo} = useDisclosure(); 
+  const { isOpen: info, onToggle: onInfo } = useDisclosure();
 
   const router = useRouter();
 
@@ -59,16 +60,17 @@ export function Questions() {
       }
     };
     fetchQuestionnaires();
-    if(!(session?.user.data.userData && status !== 'loading')){
+    if (!(session?.user.terms && status !== 'loading')) {
       setIsOpen(true);
       setIsLoading(false);
-    }else{
+    } else {
       setIsLoading(false);
       setIsOpen(false)
-      if(session.user.data.userData){
+      if (session?.user.lastAnswer) {
         getUserAnswers(session.user.userId).then((answers) => {
-          if(answers.length > 0){
+          if (answers.length > 0) {
             setResult(true);
+            setAnswered(true);
           }
         }
         )
@@ -95,6 +97,8 @@ export function Questions() {
         if (userDoc.exists()) {
           const answersRef = collection(db, 'users', session.user.userId, 'answers');
           const answersQuerySnapshot = await getDocs(answersRef);
+          await storeUser({ ...session.user, 'lastAnswer': new Date() }, session.user.userId);
+          await update()
           if (answersQuerySnapshot.empty) {
             const data = answers.reduce((acc, answer) => {
               const fieldName = `question_${answer.question + 1}`;
@@ -107,8 +111,6 @@ export function Questions() {
             data.questionnaire = questionnaires[0].id;
             const docRef = doc(answersRef);
             await setDoc(docRef, data);
-          } else {
-            
           }
         }
       } catch (error) {
@@ -121,67 +123,69 @@ export function Questions() {
         })
       }
     }
-    saveAnswers();
+    if(!answered){
+      saveAnswers();
+    }
     router.push('/profile');
   };
 
   return (
     <>
       <Layout>
-      { isLoading ? 
-        <Flex h='90vh' justifyContent='center' alignItems='center'>
-          <Spinner size='xl' />
-        </Flex>
-        :
-        (!result ?
-        <Box p='2' mx={[4, 8]} >
-          {questionnaires.map((questionnaire) => (
-          <Box key={'questionnaire-' + questionnaire.id} display='flex' flexDirection={'column'} minH='85vh' justifyContent='space-between'>
-            <Box mt='2' minH='30vh' display='flex' flexDirection='column' justifyContent='space-betwwen'>
-              <Text fontSize={['2xl','3xl', '5xl']} textAlign='center' fontWeight='bold' color='teal.500' textTransform='uppercase'>{questionnaire.name}</Text>
-              <Text px={['5', '10']} fontSize={['lg', 'xl', '2xl']} textAlign='center'>
-                Responda as questões objetivamente com o grau de certeza que você possui sobre as questões descritas abaixo, sendo
-                <strong> 1 ponto (absolutamente não concordo) e 5 pontos (absolutamente concordo).</strong>
-              </Text>
-              <Box display='flex' justifyContent='center'>
-                <Button colorScheme='teal' onClick={onInfo}>{ info ? 'Esconder' : 'Clique aqui para mais informações!'}</Button>
-              </Box> 
-              <Slide direction='bottom' in={info} style={{ zIndex: 10 }}>
-                <Box p='4' color='white' mt='4' bg='teal' shadow='md' textAlign='center'>
-                  1: absolutamente não concordo, 2: não concordo, 3: indiferente, 4: concordo, e 5: absolutamente eu concordo
-                </Box>
-              </Slide>
-            </Box> 
-            <Flex justify='center' direction='column'>
-              {questionnaire.questions.map((question, index) => (
-                <Question 
-                key={'question-' + question.question} 
-                question={question} index={index} 
-                questionnaire={questionnaire} 
-                setCurrentQuestion={setCurrentQuestion} 
-                currentQuestion={currentQuestion}
-                appendOption={appendOption}
-                answers={answers}
-                setResult={setResult}
-                />
-              ))}
-            </Flex>
-          </Box>
-          ))
-          }
-          <WelcomeModal isOpen={isOpen} setIsOpen={setIsOpen} session={session} update={update}/>
-        </Box >
-        :
-        <Box p='2' mx={[4, 8]} >
-          <Flex direction='column' justify='center' align='center' h='85vh'>
-            <Heading size='lg' textAlign='center'>
-              Obrigado por responder o questionário!
-            </Heading>
-            <Text textAlign='center'>Agora que você já respondeu o questionário, clique no botão abaixo para ver o resultado.</Text>
-            <Button onClick={redirectResult} colorScheme='teal'>Ver resultado</Button>
+        {isLoading ?
+          <Flex h='90vh' justifyContent='center' alignItems='center'>
+            <Spinner size='xl' />
           </Flex>
-        </Box>)
-      }
+          :
+          (!result ?
+            <Box p='2' mx={[4, 8]} >
+              {questionnaires.map((questionnaire) => (
+                <Box key={'questionnaire-' + questionnaire.id} display='flex' flexDirection={'column'} minH='85vh' justifyContent='space-between'>
+                  <Box mt='2' minH='30vh' display='flex' flexDirection='column' justifyContent='space-betwwen'>
+                    <Text fontSize={['2xl', '3xl', '5xl']} textAlign='center' fontWeight='bold' color='teal.500' textTransform='uppercase'>{questionnaire.name}</Text>
+                    <Text px={['5', '10']} fontSize={['lg', 'xl', '2xl']} textAlign='center'>
+                      Responda as questões objetivamente com o grau de certeza que você possui sobre as questões descritas abaixo, sendo
+                      <strong> 1 ponto (absolutamente não concordo) e 5 pontos (absolutamente concordo).</strong>
+                    </Text>
+                    <Box display='flex' justifyContent='center'>
+                      <Button colorScheme='teal' onClick={onInfo}>{info ? 'Esconder' : 'Clique aqui para mais informações!'}</Button>
+                    </Box>
+                    <Slide direction='bottom' in={info} style={{ zIndex: 10 }}>
+                      <Box p='4' color='white' mt='4' bg='teal' shadow='md' textAlign='center'>
+                        1: absolutamente não concordo, 2: não concordo, 3: indiferente, 4: concordo, e 5: absolutamente eu concordo
+                      </Box>
+                    </Slide>
+                  </Box>
+                  <Flex justify='center' direction='column'>
+                    {questionnaire.questions.map((question, index) => (
+                      <Question
+                        key={'question-' + question.question}
+                        question={question} index={index}
+                        questionnaire={questionnaire}
+                        setCurrentQuestion={setCurrentQuestion}
+                        currentQuestion={currentQuestion}
+                        appendOption={appendOption}
+                        answers={answers}
+                        setResult={setResult}
+                      />
+                    ))}
+                  </Flex>
+                </Box>
+              ))
+              }
+              <WelcomeModal isOpen={isOpen} setIsOpen={setIsOpen} session={session} update={update} />
+            </Box >
+            :
+            <Box p='2' mx={[4, 8]} >
+              <Flex direction='column' justify='center' align='center' h='85vh'>
+                <Heading size='lg' textAlign='center'>
+                  Obrigado por responder o questionário!
+                </Heading>
+                <Text textAlign='center'>Agora que você já respondeu o questionário, clique no botão abaixo para ver o resultado.</Text>
+                <Button onClick={redirectResult} colorScheme='teal'>Ver resultado</Button>
+              </Flex>
+            </Box>)
+        }
       </Layout>
     </>
   );

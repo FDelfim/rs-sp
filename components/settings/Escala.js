@@ -36,15 +36,6 @@ export default function Escala() {
         total: { extremelyLow: '', low: '', moderate: '', high: '', extremelyHigh: '' }
     });
 
-    const [amateurScale, setAmateurScale] = useState({
-        sportExperiences: { extremelyLow: '', low: '', moderate: '', high: '', extremelyHigh: '' },
-        familySocialSupport: { extremelyLow: '', low: '', moderate: '', high: '', extremelyHigh: '' },
-        personalResources: { extremelyLow: '', low: '', moderate: '', high: '', extremelyHigh: '' },
-        spirituality: { extremelyLow: '', low: '', moderate: '', high: '', extremelyHigh: '' },
-        sportSocialSupport: { extremelyLow: '', low: '', moderate: '', high: '', extremelyHigh: '' },
-        total: { extremelyLow: '', low: '', moderate: '', high: '', extremelyHigh: '' }
-    });
-
     const fetchProfessionalScale = () => {
         fetch('/api/settings/scale?id=professionalScale', {
             method: 'GET',
@@ -62,22 +53,6 @@ export default function Escala() {
         })
     }
 
-    const fetchAmateurScale = () => {
-        fetch('/api/settings/scale?id=amateurScale', {
-            method: 'GET',
-        }).then((res) => res.json())
-        .then((data) => {
-            data.error ? null : setAmateurScale(data)
-        }
-        ).catch((error) => {
-            toast({
-                title: error,
-                status: 'error',
-                duration: 3000,
-                isClosable: true,
-            });
-        })
-    }
 
     const handleSubmit = (id) => (e) => {
         e.preventDefault();
@@ -105,7 +80,6 @@ export default function Escala() {
 
     useEffect(() => {
         fetchProfessionalScale();
-        fetchAmateurScale();
     }, [])
 
     const bgColor = useColorModeValue('white', 'gray.800');

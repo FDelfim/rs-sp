@@ -1,7 +1,7 @@
-import { Box, Card, Flex, FormLabel, Heading, Input, InputLeftAddon, Text, useColorModeValue, InputGroup, FormControl, Button, useToast } from '@chakra-ui/react'
+import { Box, Card, Flex, FormLabel, Input, InputLeftAddon, Text, InputGroup, FormControl, Button, useToast } from '@chakra-ui/react'
 import React, { useState } from 'react'
 import { FiFileText } from 'react-icons/fi'
-import {Select} from 'chakra-react-select'
+import { Select } from 'chakra-react-select'
 import { getJsonReport } from '../../controllers/ReportController'
 
 const formatToReport = (userAnswers) => {
@@ -9,50 +9,33 @@ const formatToReport = (userAnswers) => {
         user: userAnswers[0].user,
         answers: userAnswers[0].answers[0]
     };
-
     return { ...formattedAnswers.user, ...formattedAnswers.answers };
 }
 
 export default function Report() {
-
-    const [inicio, setInicio] = useState();
-    const [fim, setFim] = useState();
-    const [tipo, setTipo] = useState();
-
+    const [inicio, setInicio] = useState('');
+    const [fim, setFim] = useState('');
+    const [tipo, setTipo] = useState([]);
     const toast = useToast();
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        let tipos = [];
-
-        if (tipo.length == 0) {
-            toast({
-                title: 'Erro',
-                description: 'Selecione pelo menos um tipo de atleta.',
-                status: 'error',
-                duration: 3000,
-                isClosable: true,
-            });
-            return;
-        }
-
-        tipo.map((t) => {
-            tipos.push(t.value);
-        });
 
         const inicioTimestamp = new Date(inicio).getTime();
         const fimTimestamp = new Date(fim).getTime();
 
         if (inicioTimestamp > fimTimestamp) {
             toast({
-                title: 'Erro',
+                title: 'Atenção',
                 description: 'A data de início deve ser anterior à data de fim.',
-                status: 'error',
+                status: 'warning',
                 duration: 3000,
                 isClosable: true,
             });
             return;
         }
+
+        const tipos = tipo.map((t) => t.value);
 
         const data = {
             inicio: inicioTimestamp,
@@ -62,18 +45,14 @@ export default function Report() {
 
         getJsonReport(data)
             .then((res) => {
-                const formatted = res.map((r) => {
-                    return {
-                        ...r.user,
-                        ...r.answers[0]
-                    };
-                });
-
+                const formatted = res.map((r) => ({
+                    ...r.user,
+                    ...r.answers[0]
+                }));
             })
             .catch((err) => {
-            console.log(err);
-        });
-
+                console.log(err);
+            });
     }
 
     return (
@@ -91,20 +70,22 @@ export default function Report() {
                         <Flex>
                             <InputGroup>
                                 <InputLeftAddon children="De" />
-                                <Input type='date' onChange={(e) => {setInicio(e.target.value)}} />
+                                <Input type='date' onChange={(e) => { setInicio(e.target.value) }} />
                                 <InputLeftAddon children="Até" />
-                                <Input type='date' onChange={(e) => {setFim(e.target.value)}} />
+                                <Input type='date' onChange={(e) => { setFim(e.target.value) }} />
                             </InputGroup>
                         </Flex>
                     </FormControl>
                     <FormControl mt='4' isRequired>
                         <FormLabel>Tipo de atleta</FormLabel>
                         <Select placeholder='Selecione pelo menos uma opção...'
-                            options={[{ value: 'Profissional', label: 'Profissional' },
-                            { value: 'Amador', label: 'Amador' },
-                            { value: 'noAthlete', label: 'Não atleta' }]}
+                            options={[
+                                { value: 'Profissional', label: 'Profissional' },
+                                { value: 'Amador', label: 'Amador' },
+                                { value: 'null', label: 'Não atleta' }
+                            ]}
                             isMulti={true}
-                            onChange={(e) => {setTipo(e)}}
+                            onChange={(e) => { setTipo(e) }}
                         />
                     </FormControl>
                     <Button mt='3' type="submit" w='100%' colorScheme='teal' size='sm'>Gerar relatório</Button>
