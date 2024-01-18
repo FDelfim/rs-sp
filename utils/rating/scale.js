@@ -10,8 +10,6 @@ export const dimensionsSums = (dimensions, answers, questionnaire) => {
       dimensionCounts[dimension] = questionnaire.filter(q => q.dimension === dimensionTranslate).length;
     });
 
-    console.log(dimensionCounts);
-
     questionnaire.forEach((question) => {
       const dimension = reverseTranslate[question.dimension];
       const questionIndex = questionnaire.indexOf(question);

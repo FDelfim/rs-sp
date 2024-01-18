@@ -3,7 +3,7 @@ import {
   AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, Badge, Grid, GridItem, useDisclosure, Link
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { InfoIcon } from '@chakra-ui/icons';
+import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon, InfoIcon } from '@chakra-ui/icons';
 import { BsWhatsapp, BsTwitter, BsFacebook, BsTelegram, BsShare } from 'react-icons/bs';
 import { translate, reverseTranslate, colorScale } from '../utils/translates';
 import Layout from '../components/Layout';
@@ -11,6 +11,9 @@ import RadarChart from '../components/RadarChart';
 import CryptoJS from 'crypto-js';
 import { useSession } from 'next-auth/react';
 import { userRating } from '../Controllers/ProfileController';
+import { differenceAnswers } from '../Controllers/ProfileController';
+import { abbreviation } from '../utils/translates';
+import Footer from '../components/Footer';
 
 const secretKey = process.env.NEXT_PUBLIC_CRYPT_KEY;
 
@@ -25,6 +28,8 @@ export default function Profile() {
   const [userInfo, setUserInfo] = useState(null);
   const [series, setSeries] = useState(null);
   const [userRank, setUserRank] = useState({})
+  const [questionnaireName, setQuestionnaireName] = useState(null);
+  const [difference, setDifference] = useState(null);
 
   const handleShare = () => {
     if (navigator.share) {
@@ -45,19 +50,24 @@ export default function Profile() {
 
   useEffect(() => {
 
-    async function rateUser(){
-      const {userRank, sums, answers} = await userRating(session.user);
+    async function rateUser() {
+      const { userRank, sums, answers, questionnaire, questionnaireName } = await userRating(session.user);
       const userInfo = session.user;
       setUserInfo(userInfo);
       setAnswers(answers);
       setSeries(sums);
       setUserRank(userRank);
+      setQuestionnaireName(questionnaireName);
+      if(answers.length > 1) {
+        const difference  = differenceAnswers(answers, Object.keys(series[0]), questionnaire);
+        setDifference(difference[0]);
+      }
     }
 
     if (session?.user.lastAnswer) {
       rateUser();
       setIsLoaded(true)
-    } else if(session?.user.userId){
+    } else if (session?.user.userId) {
       setIsLoaded(true)
     }
   }, [session?.user.userId]);
@@ -65,11 +75,11 @@ export default function Profile() {
   return (
     <>
       <Layout>
-        <Flex mx={['4', '25', '30']} mt={['4', '4', '10']} flexDirection={['column', 'column', 'row']}>
+        <Flex mx={['3', '25', '30']} mt={['4', '4', '10']} flexDirection={['column', 'column', 'row']}>
           <Flex justifyContent='center'>
             <Box align='center' flexDirection={['column', 'column']} gap='4' p='3' w={['90%', '90%', '25vw']} minH={['', '', '80vh']} me={['', '', '5']}>
               <Skeleton isLoaded={isLoaded}>
-                <Avatar size='2xl' name={session?.user.name} src={session?.user.image} />
+                <Avatar mb='2' size='2xl' name={session?.user.name} src={session?.user.image} />
               </Skeleton>
               <Flex flexDirection='column' w='100%' >
                 <Skeleton isLoaded={isLoaded}>
@@ -91,6 +101,7 @@ export default function Profile() {
                               <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Data de Nascimento:</strong> {new Date(userInfo?.birthDate?.seconds * 1000).toLocaleDateString()}</Text>
                               <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Naturalidade:</strong> {userInfo.birthCity}</Text>
                               <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>E-mail:</strong> {userInfo.email}</Text>
+                              <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Última resposta:</strong> {new Date(userInfo?.lastAnswer?.seconds * 1000).toLocaleDateString('br')}</Text>
                               <Flex gap='10px' justifyContent='center' p='2'>
                                 <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.isAthlete ? 'teal' : 'yellow'}>{userInfo?.isAthlete ? 'Atleta' : 'Não atleta'}</Badge> </Text>
                                 <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.practicesSport ? 'teal' : 'yellow'}>{userInfo?.practicesSport ? 'Pratica esporte' : 'Não pratica esporte'}</Badge> </Text>
@@ -135,10 +146,10 @@ export default function Profile() {
                             </Flex>
                           }
                           <Button colorScheme='teal' onClick={() => {
-                            const seriesString = JSON.stringify(series);
+                            const seriesString = JSON.stringify(series[1]);
                             let text = `name=${session?.user.name}&serie=${seriesString}`;
-                            if (userRank) {
-                              text += `&rank=${JSON.stringify(userRank)}`
+                            if (userRank[1]) {
+                              text += `&rank=${JSON.stringify(userRank[1])}`
                             }
                             const ciphertext = CryptoJS.AES.encrypt(text, secretKey).toString();
                             window.location.href = `/result?${ciphertext}`;
@@ -162,7 +173,29 @@ export default function Profile() {
                       </Grid>
                     }
                   </Box>
-
+                  <Divider/>
+                  <Box>
+                    <Flex gap='1' justifyContent={['center', 'start']}>
+                      <Text fontSize={['xl', '2xl']} fontWeight='500' mt='4' m='0'><strong>Comparação de resultados </strong></Text>
+                    </Flex>
+                    <Text fontSize={['md', 'lg']} fontWeight='500' mt='4' m='0'><strong>Questionário:</strong> {questionnaireName}</Text>
+                    <Text fontSize={['sm', 'md']} textAlign={['center', 'center']} fontWeight='500' mt='4' m='0'>Compração de resultado das duas últimas respostas</Text>
+                    <Text fontSize={['xs', 'xs']} textAlign={['center', 'center']}>Calculo realizado: Resposta 01 (mais antiga) - Resposta 02 (mais recente)</Text>
+                    <Flex flexDirection={['column', 'column']} justifyContent='start' alignItems={['center', 'start']}gap='2' mt='2'>
+                      {
+                        difference && 
+                        <Grid templateColumns={['repeat(3, 1fr)', 'repeat(3)' ,'repeat(6, 1fr)']} w='100%' templateRows={['','','repeat(1, 1fr)']}>
+                          {
+                            Object.entries(difference).map(([key, value]) => (
+                              <GridItem display='flex' justifyContent='center' rowSpan={1} colSpan={1} key={key}>
+                                <Badge>{abbreviation[key]}: {value} { value < 0 ? <ArrowDownIcon color='red'/> : <ArrowUpIcon color='green'/>}</Badge>
+                              </GridItem>
+                            ))
+                          }
+                        </Grid>
+                      }
+                    </Flex>
+                  </Box>
                 </Skeleton>
                 :
                 <Skeleton isLoaded={isLoaded} h='100%'>
@@ -176,6 +209,7 @@ export default function Profile() {
             }
           </Flex>
         </Flex>
+        <Footer/>
       </Layout>
     </>
   )

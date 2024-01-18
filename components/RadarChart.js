@@ -1,4 +1,4 @@
-import { useColorModeValue, Box } from '@chakra-ui/react';
+import { useColorModeValue, Box, FormErrorMessage } from '@chakra-ui/react';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 const ApexCharts = dynamic(() => import('react-apexcharts'), { ssr: false });
@@ -13,11 +13,12 @@ export default function RadarChart(props) {
   const primaryRadarColor = colorMode === 'light' ? '#e9e9e9' : '#000000';
   const secondaryRadarColor = colorMode === 'light' ? '#ffffff' : '#2f2f2f';
   const strokeColor = colorMode === 'light' ? '#e9e9e9' : '#000000';
+  const [series, setSeries ] = useState([]);
 
   const [keysValues, setKeysValues] = useState([]);
 
   useEffect(() => {
-    const newKeysValues = Object.keys(valores)
+    const newKeysValues = Object.keys(valores[0])
       .filter((key) => key !== 'total')
       .sort()
       .map((key) => ({
@@ -25,9 +26,17 @@ export default function RadarChart(props) {
         value: parseInt(valores[key]),
       }));
     setKeysValues(newKeysValues);
+    
+    const formattedData = Object.values(valores).map((key, index) => ({
+      name: `Resposta ${index + 1}`,
+      data: Object.keys(key).filter(k => k !== 'total').map(k => key[k])
+    }));
+
+    setSeries(formattedData);
   }, [valores]);
 
   const options = {
+    colors: ['#319795', '#D3B041'],
     plotOptions: {
       radar: {
         polygons: {
@@ -63,15 +72,12 @@ export default function RadarChart(props) {
     },
     fill: {
       opacity: 0.4,
-      colors: ['#319795'],
     },
     stroke: {
       show: true,
       width: 4,
-      colors: ['#319795'],
     },
     markers: {
-      colors: ['#319795'],
       strokeColors: strokeColor,
       strokeWidth: 2,
     },
@@ -79,9 +85,6 @@ export default function RadarChart(props) {
       enabled: true,
       background: {
         borderRadius: 3,
-      },
-      style: {
-        colors: ['#319795'],
       },
     },
     responsive: [
@@ -97,11 +100,6 @@ export default function RadarChart(props) {
     ],
   };
 
-  const series = [
-    {
-      data: keysValues.map((item) => item.value),
-    },
-  ];
 
   return (
     <Box w="100%" p="0" m="0">

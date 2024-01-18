@@ -36,9 +36,15 @@ export function Nav({ openAuthModal }) {
                     <MenuList>
                       <MenuItem onClick={() => router.push('/profile')}>Perfil</MenuItem>
                       <MenuItem onClick={() => signOut()}>Sair</MenuItem>
-                      <Divider orientation='horizontal' p='0' m='0'/>
-                      <MenuItem textColor='teal.500' onClick={() => router.push('/settings')}><CheckIcon me='1'/>Área Super Usuário</MenuItem> 
-                    </MenuList>
+                      
+                      {
+                        session.user.role == 'admin' &&
+                        <>
+                          <Divider orientation='horizontal' p='0' m='0'/>
+                          <MenuItem textColor='teal.500' onClick={() => router.push('/settings')}><CheckIcon me='1'/>Área Super Usuário</MenuItem> 
+                        </>
+                      }
+                      </MenuList>
                   </Menu>
                 </>
             ) : (

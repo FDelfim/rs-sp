@@ -30,7 +30,7 @@ export default function result() {
       const decrypted = bytes.toString(CryptoJS.enc.Utf8);
       const splited = decrypted.split('&');
       const userName = splited[0].split('=')[1];
-      const series = JSON.parse(splited[1].split('=')[1])
+      const series = { 0: JSON.parse(splited[1].split('=')[1])}
       const rank = JSON.parse(splited[2].split('=')[1]);
       setUserName(userName);
       setSeries(series);

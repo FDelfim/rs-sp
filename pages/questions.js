@@ -21,6 +21,7 @@ export function Questions() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [answered, setAnswered] = useState(false);
+  const [nextAnser, setNextAnswer] = useState(false);
 
   const { isOpen: info, onToggle: onInfo } = useDisclosure();
 
@@ -72,6 +73,12 @@ export function Questions() {
             setResult(true);
             setAnswered(true);
           }
+          const nextAnser = (new Date(session.user?.lastAnswer?.seconds * 1000 + 90 * 24 * 60 * 60 * 1000))
+          setNextAnswer(nextAnser);
+          if(nextAnser < new Date()){
+            setResult(false);
+            setAnswered(false);
+          }
         }
         )
       }
@@ -99,7 +106,7 @@ export function Questions() {
           const answersQuerySnapshot = await getDocs(answersRef);
           await storeUser({ ...session.user, 'lastAnswer': new Date() }, session.user.userId);
           await update()
-          if (answersQuerySnapshot.empty) {
+          if (answersQuerySnapshot) {
             const data = answers.reduce((acc, answer) => {
               const fieldName = `question_${answer.question + 1}`;
               return {
@@ -181,6 +188,14 @@ export function Questions() {
                 <Heading size='lg' textAlign='center'>
                   Obrigado por responder o questionário!
                 </Heading>
+                {
+                  nextAnser && !result &&
+                  <>
+                    <Text textAlign='center'>
+                      Você poderá responder novamente em {nextAnser.toLocaleDateString()}
+                    </Text> 
+                  </>
+                }
                 <Text textAlign='center'>Agora que você já respondeu o questionário, clique no botão abaixo para ver o resultado.</Text>
                 <Button onClick={redirectResult} colorScheme='teal'>Ver resultado</Button>
               </Flex>
