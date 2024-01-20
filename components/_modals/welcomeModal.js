@@ -23,6 +23,7 @@ export default function WelcomeModal({ isOpen, setIsOpen, session, update }) {
     athleteLevel: null,
     terms: false
   });
+  
   const [showTerms, setShowTerms] = useState(false);
 
   const { getRadioProps: getAthleteRadioProps } = useRadioGroup({

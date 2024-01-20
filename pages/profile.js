@@ -14,14 +14,16 @@ import { userRating } from '../Controllers/ProfileController';
 import { differenceAnswers } from '../Controllers/ProfileController';
 import { abbreviation } from '../utils/translates';
 import Footer from '../components/Footer';
+import EditUserModal from '../components/_modals/editUserModal';
 
 const secretKey = process.env.NEXT_PUBLIC_CRYPT_KEY;
 
 export default function Profile() {
 
-  const { data: session } = useSession();
+  const { data: session, update } = useSession();
   const toast = useToast();
   const { isOpen: info, onToggle: onInfo } = useDisclosure();
+  const { isOpen: editUser, onClose: onCloseEditUser, onOpen: onOpenEditUser } = useDisclosure();
 
   const [answers, setAnswers] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -58,19 +60,19 @@ export default function Profile() {
       setSeries(sums);
       setUserRank(userRank);
       setQuestionnaireName(questionnaireName);
-      if(answers.length > 1) {
-        const difference  = differenceAnswers(answers, Object.keys(series[0]), questionnaire);
+      if (answers.length > 1 && sums) {
+        const difference = differenceAnswers(answers, Object.keys(sums[0]), questionnaire);
         setDifference(difference[0]);
       }
+      setIsLoaded(true)
     }
 
     if (session?.user.lastAnswer) {
       rateUser();
-      setIsLoaded(true)
     } else if (session?.user.userId) {
       setIsLoaded(true)
     }
-  }, [session?.user.userId]);
+  }, [session?.user]);
 
   return (
     <>
@@ -101,12 +103,14 @@ export default function Profile() {
                               <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Data de Nascimento:</strong> {new Date(userInfo?.birthDate?.seconds * 1000).toLocaleDateString()}</Text>
                               <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Naturalidade:</strong> {userInfo.birthCity}</Text>
                               <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>E-mail:</strong> {userInfo.email}</Text>
+                              <Divider/>
                               <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Última resposta:</strong> {new Date(userInfo?.lastAnswer?.seconds * 1000).toLocaleDateString('br')}</Text>
-                              <Flex gap='10px' justifyContent='center' p='2'>
+                              <Grid templateColumns={['repeat(1, 1fr)', 'repeat(3, 1fr)']}>
                                 <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.isAthlete ? 'teal' : 'yellow'}>{userInfo?.isAthlete ? 'Atleta' : 'Não atleta'}</Badge> </Text>
-                                <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.practicesSport ? 'teal' : 'yellow'}>{userInfo?.practicesSport ? 'Pratica esporte' : 'Não pratica esporte'}</Badge> </Text>
                                 <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.athleteLevel === 'Profissional' ? 'teal' : 'yellow'}>{userInfo?.athleteLevel}</Badge></Text>
-                              </Flex>
+                                <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.practicesSport ? 'teal' : 'yellow'}>{userInfo?.practicesSport ? 'Pratica esporte' : 'Não pratica esporte'}</Badge> </Text>
+                              </Grid>
+                              <Button colorScheme='teal' size='sm' w='100%' onClick={() => { onOpenEditUser() }}>Editar dados</Button>
                             </Box>
                             :
                             <Text fontSize={['sm', 'md']} m='0' textAlign='center' fontWeight='500'>Não há dados cadastrados</Text>
@@ -126,8 +130,8 @@ export default function Profile() {
                 <Skeleton isLoaded={isLoaded} h='100%'>
                   <Box>
                     {series && isLoaded &&
-                      <Grid templateColumns={['repeat(1)', 'repeat(1)', 'repeat(3, 1fr)']}>
-                        <GridItem colSpan={[3, 2]}>
+                      <Grid templateColumns={['repeat(1)', 'repeat(1)', 'repeat(4, 2fr)']}>
+                        <GridItem colSpan={[3, 3]}>
                           <Flex gap='1' justifyContent={['center', 'start']}>
                             <Text fontSize={['xl', '2xl']} fontWeight='500' mt='4' m='0'><strong>Resumo da sua resiliência </strong></Text><InfoIcon cursor='pointer' onClick={onInfo} color='teal.500' />
                           </Flex>
@@ -154,7 +158,7 @@ export default function Profile() {
                             const ciphertext = CryptoJS.AES.encrypt(text, secretKey).toString();
                             window.location.href = `/result?${ciphertext}`;
                           }} mb='3' href='/result'>Ver resiliência detalhada</Button>
-                          <Box display='flex' flexDirection={['row', 'column']} justifyContent='center' m='0'>
+                          <Box display='flex' flexDirection={['row', 'row' ,'column']} justifyContent='center' m='0'>
                             <Text fontSize={['md', 'xl']} fontWeight='bold' textAlign='center'>Compartilhar resultado</Text>
                             <Box display='flex'>
                               <Button variant='ghost' colorScheme='green' p='0' fontSize='3xl'><Link href='whatsapp://send?text=Consegui ver o resultado da minha resiliência psicológica no esporte neste site, veja a sua também! https://rs-sp.vercel.app/'><BsWhatsapp /></Link></Button>
@@ -173,29 +177,35 @@ export default function Profile() {
                       </Grid>
                     }
                   </Box>
-                  <Divider/>
-                  <Box>
-                    <Flex gap='1' justifyContent={['center', 'start']}>
-                      <Text fontSize={['xl', '2xl']} fontWeight='500' mt='4' m='0'><strong>Comparação de resultados </strong></Text>
-                    </Flex>
-                    <Text fontSize={['md', 'lg']} fontWeight='500' mt='4' m='0'><strong>Questionário:</strong> {questionnaireName}</Text>
-                    <Text fontSize={['sm', 'md']} textAlign={['center', 'center']} fontWeight='500' mt='4' m='0'>Compração de resultado das duas últimas respostas</Text>
-                    <Text fontSize={['xs', 'xs']} textAlign={['center', 'center']}>Calculo realizado: Resposta 01 (mais antiga) - Resposta 02 (mais recente)</Text>
-                    <Flex flexDirection={['column', 'column']} justifyContent='start' alignItems={['center', 'start']}gap='2' mt='2'>
-                      {
-                        difference && 
-                        <Grid templateColumns={['repeat(3, 1fr)', 'repeat(3)' ,'repeat(6, 1fr)']} w='100%' templateRows={['','','repeat(1, 1fr)']}>
+                  {
+                    answers.length > 1 &&
+                    <>
+                      <Divider />
+                      <Box>
+                        <Flex gap='1' justifyContent={['center', 'start']}>
+                          <Text fontSize={['xl', '2xl']} fontWeight='500' mt='4' m='0'><strong>Comparação de resultados </strong></Text>
+                        </Flex>
+                        <Text fontSize={['md', 'lg']} fontWeight='500' mt='4' m='0'><strong>Questionário:</strong> {questionnaireName}</Text>
+                        <Text fontSize={['sm', 'md']} textAlign={['center', 'center']} fontWeight='500' mt='4' m='0'>Compração de resultado das duas últimas respostas</Text>
+                        <Text fontSize={['xs', 'xs']} textAlign={['center', 'center']}>Calculo realizado: Resposta 01 (mais antiga) - Resposta 02 (mais recente)</Text>
+                        <Flex flexDirection={['column', 'column']} justifyContent='start' alignItems={['center', 'start']} gap='2' mt='2'>
                           {
-                            Object.entries(difference).map(([key, value]) => (
-                              <GridItem display='flex' justifyContent='center' rowSpan={1} colSpan={1} key={key}>
-                                <Badge>{abbreviation[key]}: {value} { value < 0 ? <ArrowDownIcon color='red'/> : <ArrowUpIcon color='green'/>}</Badge>
-                              </GridItem>
-                            ))
+                            difference &&
+                            <Grid templateColumns={['repeat(3, 1fr)', 'repeat(3)', 'repeat(6, 1fr)']} w='100%' templateRows={['', '', 'repeat(1, 1fr)']}>
+                              {
+                                Object.entries(difference).map(([key, value]) => (
+                                  <GridItem display='flex' justifyContent='center' rowSpan={1} colSpan={1} key={key}>
+                                    <Badge>{abbreviation[key]}: {value} {value < 0 ? <ArrowDownIcon color='red' /> : <ArrowUpIcon color='green' />}</Badge>
+                                  </GridItem>
+                                ))
+                              }
+                            </Grid>
                           }
-                        </Grid>
-                      }
-                    </Flex>
-                  </Box>
+                        </Flex>
+                      </Box>
+
+                    </>
+                  }
                 </Skeleton>
                 :
                 <Skeleton isLoaded={isLoaded} h='100%'>
@@ -209,7 +219,8 @@ export default function Profile() {
             }
           </Flex>
         </Flex>
-        <Footer/>
+        <EditUserModal isOpen={editUser} onClose={onCloseEditUser} user={session?.user} update={update} />
+        <Footer />
       </Layout>
     </>
   )
