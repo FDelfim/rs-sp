@@ -5,6 +5,7 @@ const usersCollection = collection(db, 'users');
 
 export const getJsonReport = async (data) => {
   try {
+
     if (data.tipo.includes('null')) {
       data.tipo = data.tipo.map((t) => (t === 'null' ? null : t));
     }
@@ -22,16 +23,12 @@ export const getJsonReport = async (data) => {
           where('created_at', '>=', Timestamp.fromMillis(data.inicio)),
           where('created_at', '<=', Timestamp.fromMillis(data.fim)),
           orderBy('created_at', 'desc'),
-          limit(1)
         );
-
         const answersSnapshot = await getDocs(answersCollectionQuery);
-
         const answers = answersSnapshot.docs.map((doc) => doc.data());
         return { user: userDoc.data(), answers };
       })
     );
-
     return usersAnswers.map((result) => result.value);
   } catch (error) {
     throw error;

@@ -1,26 +1,22 @@
-import { Box, Card, Flex, FormLabel, Input, InputLeftAddon, Text, InputGroup, FormControl, Button, useToast } from '@chakra-ui/react'
+import { Box, Card, Flex, FormLabel, Input, InputLeftAddon, Text, InputGroup, FormControl, Button, useToast, Checkbox, Menu, MenuButton, MenuList, MenuItem } from '@chakra-ui/react'
 import React, { useState } from 'react'
 import { FiFileText } from 'react-icons/fi'
 import { Select } from 'chakra-react-select'
 import { getJsonReport } from '../../controllers/ReportController'
-
-const formatToReport = (userAnswers) => {
-    const formattedAnswers = {
-        user: userAnswers[0].user,
-        answers: userAnswers[0].answers[0]
-    };
-    return { ...formattedAnswers.user, ...formattedAnswers.answers };
-}
+import { csv, excel } from '../../utils/reports/RSSP-formats'
+import xlsx from 'json-as-xlsx'
+import { storeReport } from '../../services/reportServices'
+import { json2csv } from 'json-2-csv'
 
 export default function Report() {
     const [inicio, setInicio] = useState('');
     const [fim, setFim] = useState('');
     const [tipo, setTipo] = useState([]);
+    const [ format, setFormat ] = useState('');
     const toast = useToast();
-
+    
     const handleSubmit = (e) => {
         e.preventDefault();
-
         const inicioTimestamp = new Date(inicio).getTime();
         const fimTimestamp = new Date(fim).getTime();
 
@@ -43,16 +39,40 @@ export default function Report() {
             tipo: tipos
         };
 
-        getJsonReport(data)
-            .then((res) => {
-                const formatted = res.map((r) => ({
-                    ...r.user,
-                    ...r.answers[0]
-                }));
-            })
-            .catch((err) => {
-                console.log(err);
+        try {
+            getJsonReport(data).then((res) => {
+                storeReport({...res});  
+                if(format === 'xlsx'){
+                    excel(res).then((res) => {
+                        xlsx(res.sheet, res.settings);
+                    }).catch((err) => {
+                        throw err;
+                    });
+                }else if(format === 'csv'){
+                    csv(res).then((res) => {
+                        const csv = json2csv(res.formatted);
+                        const blob = new Blob([csv], { type: 'text/csv' });
+                        const link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = 'RS-SP.csv';
+                        link.click();
+                    }).catch((err) => {
+                        throw err;
+                    })
+                }
+                
+            }).catch((err) => {
+                throw err;
             });
+        } catch (error) {
+            toast({
+                title: 'Erro ao gerar relatório',
+                description: 'Não foi possível gerar o relatório',
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            })
+        }
     }
 
     return (
@@ -88,7 +108,17 @@ export default function Report() {
                             onChange={(e) => { setTipo(e) }}
                         />
                     </FormControl>
-                    <Button mt='3' type="submit" w='100%' colorScheme='teal' size='sm'>Gerar relatório</Button>
+                    <Box w='100%'>
+                        <Menu w='100%'>
+                            <MenuButton w='100%' as={Button} mt='4' colorScheme='teal' rightIcon={<FiFileText />}>
+                                Gerar relatório
+                            </MenuButton>
+                            <MenuList>
+                                <MenuItem type='submit' onClick={() => { setFormat('csv');  }} icon={<FiFileText />}>CSV</MenuItem>
+                                <MenuItem type='submit' onClick={() => { setFormat('xlsx');  }} icon={<FiFileText />}>Excel</MenuItem>
+                            </MenuList>
+                        </Menu>
+                    </Box>
                 </form>
             </Card>
         </Box>

@@ -64,6 +64,32 @@ export const dimensionsSums = (dimensions, answers, questionnaire) => {
     return dimensionSums;
 }
 
+export const dimensionsSumsUnique = (dimensions, answers, questionnaire) => {
+    const dimensionSums = {};
+    const dimensionCounts = {};
+  
+    dimensions.map((dimension) => {
+      dimensionSums[dimension] = 0;	
+      const dimensionTranslate = translate[dimension];
+      dimensionCounts[dimension] = questionnaire.filter(q => q.dimension === dimensionTranslate).length;
+    });
+  
+    questionnaire.forEach((question) => {
+      const dimension = reverseTranslate[question.dimension];
+      const questionIndex = questionnaire.indexOf(question);
+      const answerKey = `question_${questionIndex + 1}`;
+  
+      if (answers[answerKey]) {
+        const answerValue = parseInt(answers[answerKey]);
+        dimensionSums[dimension] += answerValue;
+      }
+    });
+  
+    dimensionSums['total'] = Object.values(dimensionSums).reduce((a, b) => a + b) / (Object.values(dimensionSums).length - 1);
+    return dimensionSums;
+}
+
+
 const getUserAnswers = async (id) => {
     try {
         const userDocRef = doc(usersCollection, id);
@@ -110,7 +136,7 @@ const getAmateurSample = async () => {
     }
 }
 
-const getQuestionnaire = async (id) => {
+export const getQuestionnaire = async (id) => {
     try {
         const questionnaireDocRef = doc(questionnairesCollection, id);
         const questionnaireName = (await getDoc(questionnaireDocRef)).data()
