@@ -10,8 +10,7 @@ import Layout from '../components/Layout';
 import RadarChart from '../components/RadarChart';
 import CryptoJS from 'crypto-js';
 import { useSession } from 'next-auth/react';
-import { userRating } from '../Controllers/ProfileController';
-import { differenceAnswers } from '../Controllers/ProfileController';
+import { userRating, differenceAnswers } from '../Controllers/ProfileController';
 import { abbreviation } from '../utils/translates';
 import Footer from '../components/Footer';
 import EditUserModal from '../components/_modals/editUserModal';
@@ -103,8 +102,9 @@ export default function Profile() {
                               <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Data de Nascimento:</strong> {new Date(userInfo?.birthDate?.seconds * 1000).toLocaleDateString()}</Text>
                               <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Naturalidade:</strong> {userInfo.birthCity}</Text>
                               <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>E-mail:</strong> {userInfo.email}</Text>
-                              <Divider/>
+                              <Divider />
                               <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Última resposta:</strong> {new Date(userInfo?.lastAnswer?.seconds * 1000).toLocaleDateString('br')}</Text>
+                              <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Próxima repostas:</strong> {new Date(userInfo?.lastAnswer.seconds * 1000 + 90 * 24 * 60 * 60 * 1000).toLocaleDateString()}</Text>
                               <Grid templateColumns={['repeat(1, 1fr)', 'repeat(3, 1fr)']}>
                                 <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.isAthlete ? 'teal' : 'yellow'}>{userInfo?.isAthlete ? 'Atleta' : 'Não atleta'}</Badge> </Text>
                                 <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.athleteLevel === 'Profissional' ? 'teal' : 'yellow'}>{userInfo?.athleteLevel}</Badge></Text>
@@ -150,15 +150,25 @@ export default function Profile() {
                             </Flex>
                           }
                           <Button colorScheme='teal' onClick={() => {
-                            const seriesString = JSON.stringify(series[1]);
-                            let text = `name=${session?.user.name}&serie=${seriesString}`;
-                            if (userRank[1]) {
-                              text += `&rank=${JSON.stringify(userRank[1])}`
+                            if (series.length > 1) {
+                              const seriesString = JSON.stringify(series[1]);
+                              let text = `name=${session?.user.name}&serie=${seriesString}`;
+                              if (userRank[1]) {
+                                text += `&rank=${JSON.stringify(userRank[1])}`
+                              }
+                              const ciphertext = CryptoJS.AES.encrypt(text, secretKey).toString();
+                              window.location.href = `/result?${ciphertext}`;
+                            } else {
+                              const seriesString = JSON.stringify(series[0]);
+                              let text = `name=${session?.user.name}&serie=${seriesString}`;
+                              if (userRank[0]) {
+                                text += `&rank=${JSON.stringify(userRank[0])}`
+                              }
+                              const ciphertext = CryptoJS.AES.encrypt(text, secretKey).toString();
+                              window.location.href = `/result?${ciphertext}`;
                             }
-                            const ciphertext = CryptoJS.AES.encrypt(text, secretKey).toString();
-                            window.location.href = `/result?${ciphertext}`;
                           }} mb='3' href='/result'>Ver resiliência detalhada</Button>
-                          <Box display='flex' flexDirection={['row', 'row' ,'column']} justifyContent='center' m='0'>
+                          <Box display='flex' flexDirection={['row', 'row', 'column']} justifyContent='center' m='0'>
                             <Text fontSize={['md', 'xl']} fontWeight='bold' textAlign='center'>Compartilhar resultado</Text>
                             <Box display='flex'>
                               <Button variant='ghost' colorScheme='green' p='0' fontSize='3xl'><Link href='whatsapp://send?text=Consegui ver o resultado da minha resiliência psicológica no esporte neste site, veja a sua também! https://rs-sp.vercel.app/'><BsWhatsapp /></Link></Button>

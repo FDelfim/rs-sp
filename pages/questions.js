@@ -189,7 +189,7 @@ export function Questions() {
                   Obrigado por responder o questionário!
                 </Heading>
                 {
-                  nextAnser && !result &&
+                  nextAnser &&
                   <>
                     <Text textAlign='center'>
                       Você poderá responder novamente em {nextAnser.toLocaleDateString()}
