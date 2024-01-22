@@ -15,10 +15,10 @@ export default function Sidebar({ configPage, setConfigPage, children }) {
 
   return (
     <Box bg={useColorModeValue('gray.100', 'gray.900')}>
-      <SidebarContent setConfigPage={setConfigPage} configPage={configPage} bgColor={bgColor} onClose={() => onClose} display={{ base: 'none', md: 'block' }} boxShadow={'md'} />
+      <SidebarContent configPage={configPage} setConfigPage={setConfigPage} onClose={() => onClose} bgColor={bgColor}  display={{ base: 'none', md: 'block' }} boxShadow={'md'} />
       <Drawer isOpen={isOpen} placement="left" onClose={onClose} returnFocusOnClose={false} onOverlayClick={onClose} size="full">
         <DrawerContent>
-          <SidebarContent onClose={onClose} />
+          <SidebarContent configPage={configPage} setConfigPage={setConfigPage} onClose={onClose} />
         </DrawerContent>
       </Drawer>
       <MobileNav display={{ base: 'flex', md: 'none' }} onOpen={onOpen} />
@@ -38,7 +38,7 @@ const SidebarContent = ({ configPage, setConfigPage, onClose, ...rest }) => {
         <CloseButton display={{ base: 'flex', md: 'none' }} onClick={onClose} />
       </Flex>
       {LinkItems.map((link) => (
-        <NavItem configPage={configPage} onClick={() => setConfigPage(link.name)} key={link.name} icon={link.icon}>
+        <NavItem configPage={configPage} onClick={() => {setConfigPage(link.name); onClose();}} key={link.name} icon={link.icon}>
           {link.name}
         </NavItem>
       ))}
