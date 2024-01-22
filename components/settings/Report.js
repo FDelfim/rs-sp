@@ -3,10 +3,11 @@ import React, { useState } from 'react'
 import { FiFileText } from 'react-icons/fi'
 import { Select } from 'chakra-react-select'
 import { getJsonReport } from '../../controllers/ReportController'
-import { csv, excel } from '../../utils/reports/RSSP-formats'
+import { csv, excel, txt } from '../../utils/reports/RSSP-formats'
 import xlsx from 'json-as-xlsx'
 import { storeReport } from '../../services/reportServices'
 import { json2csv } from 'json-2-csv'
+import { jsonToPlainText } from 'json-to-plain-text'
 
 export default function Report() {
     const [inicio, setInicio] = useState('');
@@ -41,7 +42,13 @@ export default function Report() {
 
         try {
             getJsonReport(data).then((res) => {
-                storeReport({...res});  
+                let report = {
+                    data: {...res},
+                    inicio: new Date(inicioTimestamp),
+                    fim: new Date(fimTimestamp),
+                    tipo: tipos,
+                }
+                storeReport(report);  
                 if(format === 'xlsx'){
                     excel(res).then((res) => {
                         xlsx(res.sheet, res.settings);
@@ -54,13 +61,34 @@ export default function Report() {
                         const blob = new Blob([csv], { type: 'text/csv' });
                         const link = document.createElement('a');
                         link.href = window.URL.createObjectURL(blob);
-                        link.download = 'RS-SP.csv';
+                        link.download = `Relatório ${res.questionnaireName}.csv`;
+                        link.click();
+                    }).catch((err) => {
+                        throw err;
+                    })
+                }else if(format === 'txt'){
+                    txt(res).then((res) => {
+                        const txt = jsonToPlainText(res.formatted);
+                        const blob = new Blob([txt], { type: 'text/plain' });
+                        const link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = `Relatório ${res.questionnaireName}.txt`;
+                        link.click();
+                    }).catch((err) => {
+                        throw err;
+                    })
+                }else if(format === 'tsv'){
+                    csv(res).then((res) => {
+                        const tsv = json2csv(res.formatted, {delimiter: '\t'});
+                        const blob = new Blob([tsv], { type: 'text/tsv' });
+                        const link = document.createElement('a');
+                        link.href = window.URL.createObjectURL(blob);
+                        link.download = `Relatório ${res.questionnaireName}.tsv`;
                         link.click();
                     }).catch((err) => {
                         throw err;
                     })
                 }
-                
             }).catch((err) => {
                 throw err;
             });
@@ -116,6 +144,8 @@ export default function Report() {
                             <MenuList>
                                 <MenuItem type='submit' onClick={() => { setFormat('csv');  }} icon={<FiFileText />}>CSV</MenuItem>
                                 <MenuItem type='submit' onClick={() => { setFormat('xlsx');  }} icon={<FiFileText />}>Excel</MenuItem>
+                                <MenuItem type='submit' onClick={() => { setFormat('txt');  }} icon={<FiFileText />}>TXT</MenuItem>
+                                <MenuItem type='submit' onClick={() => { setFormat('tsv');  }} icon={<FiFileText />}>TSV</MenuItem>
                             </MenuList>
                         </Menu>
                     </Box>

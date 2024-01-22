@@ -48,10 +48,16 @@ const formatData = async (data) => {
     return {formatted, questionnaireName}
 }
 
+export const txt = async (data) => {
+    const {formatted, questionnaireName} = await formatData(data);
+    return {formatted, questionnaireName};
+}
+
 export const csv = async (data) => {
     const {formatted, questionnaireName} = await formatData(data);
-    return {formatted};
+    return {formatted, questionnaireName};
 }
+
 
 export const excel = async (data) => {
 
