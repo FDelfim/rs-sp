@@ -2,7 +2,7 @@ import { Box, Card, Flex, FormLabel, Input, InputLeftAddon, Text, InputGroup, Fo
 import React, { useEffect, useState } from 'react'
 import { FiArrowLeft, FiArrowRight, FiDownload, FiFileText } from 'react-icons/fi'
 import { Select } from 'chakra-react-select'
-import { getJsonReport } from '../../controllers/ReportController'
+import { getJsonReport } from '../../Controllers/ReportController'
 import { csv, excel, txt } from '../../utils/reports/RSSP-formats'
 import xlsx from 'json-as-xlsx'
 import { storeReport } from '../../services/reportServices'

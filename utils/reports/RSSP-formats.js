@@ -1,4 +1,4 @@
-import { dimensionsSumsUnique, getQuestionnaire } from "../../controllers/ProfileController";
+import { dimensionsSumsUnique, getQuestionnaire } from "../../Controllers/ProfileController";
 
 const dimensions = ['spirituality', 'sportExperiences', 'familySocialSupport', 'personalResources', 'sportSocialSupport'];
 

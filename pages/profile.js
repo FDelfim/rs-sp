@@ -1,17 +1,17 @@
+import CryptoJS from 'crypto-js';
 import {
   Flex, Text, Avatar, Box, Divider, Alert, AlertIcon, Skeleton, useToast, Accordion, Slide, Button,
   AccordionItem, AccordionButton, AccordionPanel, AccordionIcon, Badge, Grid, GridItem, useDisclosure, Link
 } from '@chakra-ui/react';
 import { useEffect, useState } from 'react';
-import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon, InfoIcon } from '@chakra-ui/icons';
+import { ArrowDownIcon, ArrowUpIcon, InfoIcon, MinusIcon } from '@chakra-ui/icons';
 import { BsWhatsapp, BsTwitter, BsFacebook, BsTelegram, BsShare } from 'react-icons/bs';
-import { translate, reverseTranslate, colorScale } from '../utils/translates';
-import Layout from '../components/Layout';
-import RadarChart from '../components/RadarChart';
-import CryptoJS from 'crypto-js';
 import { useSession } from 'next-auth/react';
+import { translate, colorScale } from '../utils/translates';
 import { userRating, differenceAnswers } from '../Controllers/ProfileController';
 import { abbreviation } from '../utils/translates';
+import Layout from '../components/Layout';
+import RadarChart from '../components/RadarChart';
 import Footer from '../components/Footer';
 import EditUserModal from '../components/_modals/editUserModal';
 
@@ -76,9 +76,9 @@ export default function Profile() {
   return (
     <>
       <Layout>
-        <Flex mx={['3', '25', '30']} mt={['4', '4', '10']} flexDirection={['column', 'column', 'row']}>
+        <Flex mx={['3', '25', '30']} mt={['4', '4', '10']} flexDirection={['column', 'column', 'column', 'row' ,'row']}>
           <Flex justifyContent='center'>
-            <Box align='center' flexDirection={['column', 'column']} gap='4' p='3' w={['90%', '90%', '25vw']} minH={['', '', '80vh']} me={['', '', '5']}>
+            <Box align='center' flexDirection={['column', 'column']} gap='4' p='3' w={['90%', '90%', '80%', '70%','25vw']} minH={['', '','','', '80vh']} me={['', '', '5']}>
               <Skeleton isLoaded={isLoaded}>
                 <Avatar mb='2' size='2xl' name={session?.user.name} src={session?.user.image} />
               </Skeleton>
@@ -130,14 +130,14 @@ export default function Profile() {
                 <Skeleton isLoaded={isLoaded} h='100%'>
                   <Box>
                     {series && isLoaded &&
-                      <Grid templateColumns={['repeat(1)', 'repeat(1)', 'repeat(4, 2fr)']}>
+                      <Grid templateColumns={['repeat(1)', 'repeat(1)', 'repeat(1)',  'repeat(1)', 'repeat(4, 2fr)']}>
                         <GridItem colSpan={[3, 3]}>
                           <Flex gap='1' justifyContent={['center', 'start']}>
-                            <Text fontSize={['xl', '2xl']} fontWeight='500' mt='4' m='0'><strong>Resumo da sua resiliência </strong></Text><InfoIcon cursor='pointer' onClick={onInfo} color='teal.500' />
+                            <Text fontSize={['xl', '2xl']} textAlign='center' fontWeight='500' mt='4' m='0'><strong>Resultado Geral da Resiliência Psicológica no Esporte</strong></Text><InfoIcon cursor='pointer' onClick={onInfo} color='teal.500' />
                           </Flex>
                           <RadarChart series={series} />
                         </GridItem>
-                        <GridItem colSpan={[3, 1]} display='flex' flexDirection='column' justifyContent='end' alignItems='center' mb={['0', '10']}>
+                        <GridItem colSpan={[3, 3, 3, 3 ,1]} display='flex' flexDirection='column' justifyContent='center' alignItems='center' mb={['0', '5']}>
                           {
                             userRank && userInfo.isAthlete &&
                             <Flex>
@@ -150,19 +150,19 @@ export default function Profile() {
                             </Flex>
                           }
                           <Button colorScheme='teal' onClick={() => {
-                            if (series.length > 1) {
+                            if (series[1]) {
                               const seriesString = JSON.stringify(series[1]);
                               let text = `name=${session?.user.name}&serie=${seriesString}`;
-                              if (userRank[1]) {
-                                text += `&rank=${JSON.stringify(userRank[1])}`
+                              if (userRank) {
+                                text += `&rank=${JSON.stringify(userRank)}`
                               }
                               const ciphertext = CryptoJS.AES.encrypt(text, secretKey).toString();
                               window.location.href = `/result?${ciphertext}`;
                             } else {
                               const seriesString = JSON.stringify(series[0]);
                               let text = `name=${session?.user.name}&serie=${seriesString}`;
-                              if (userRank[0]) {
-                                text += `&rank=${JSON.stringify(userRank[0])}`
+                              if (userRank) {
+                                text += `&rank=${JSON.stringify(userRank)}`
                               }
                               const ciphertext = CryptoJS.AES.encrypt(text, secretKey).toString();
                               window.location.href = `/result?${ciphertext}`;
@@ -205,7 +205,7 @@ export default function Profile() {
                               {
                                 Object.entries(difference).map(([key, value]) => (
                                   <GridItem display='flex' justifyContent='center' rowSpan={1} colSpan={1} key={key}>
-                                    <Badge>{abbreviation[key]}: {value} {value < 0 ? <ArrowDownIcon color='red' /> : <ArrowUpIcon color='green' />}</Badge>
+                                    <Badge>{abbreviation[key]}: {value} {value < 0 ? <ArrowDownIcon color='red' /> : ( value == 0 ? <MinusIcon color='grey'/> :<ArrowUpIcon color='green' />)}</Badge>
                                   </GridItem>
                                 ))
                               }

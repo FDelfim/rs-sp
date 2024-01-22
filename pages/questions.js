@@ -21,7 +21,7 @@ export function Questions() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [answered, setAnswered] = useState(false);
-  const [nextAnser, setNextAnswer] = useState(false);
+  const [nextAnswer, setNextAnswer] = useState(false);
 
   const { isOpen: info, onToggle: onInfo } = useDisclosure();
 
@@ -73,9 +73,9 @@ export function Questions() {
             setResult(true);
             setAnswered(true);
           }
-          const nextAnser = (new Date(session.user?.lastAnswer?.seconds * 1000 + 90 * 24 * 60 * 60 * 1000))
-          setNextAnswer(nextAnser);
-          if(nextAnser < new Date()){
+          const nextAnswer = (new Date(session.user?.lastAnswer?.seconds * 1000 + 90 * 24 * 60 * 60 * 1000))
+          setNextAnswer(nextAnswer);
+          if(nextAnswer < new Date()){
             setResult(false);
             setAnswered(false);
           }
@@ -189,10 +189,10 @@ export function Questions() {
                   Obrigado por responder o questionário!
                 </Heading>
                 {
-                  nextAnser &&
+                  nextAnswer &&
                   <>
                     <Text textAlign='center'>
-                      Você poderá responder novamente em {nextAnser.toLocaleDateString()}
+                      Você poderá responder novamente em {nextAnswer.toLocaleDateString()}
                     </Text> 
                   </>
                 }

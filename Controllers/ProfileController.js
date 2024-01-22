@@ -1,8 +1,7 @@
 import { collection, doc, getDoc, getDocs, limit, orderBy, query, updateDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import amateurRating from '../utils/amateurRating';
-import { translate, reverseTranslate, colorScale } from '../utils/translates';
-
+import { translate, reverseTranslate } from '../utils/translates';
 
 const usersCollection = collection(db, 'users');
 const settingsCollection = collection(db, 'settings');

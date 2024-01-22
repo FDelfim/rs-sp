@@ -1,4 +1,4 @@
-import { useColorModeValue, Box, FormErrorMessage } from '@chakra-ui/react';
+import { useColorModeValue, Box } from '@chakra-ui/react';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 const ApexCharts = dynamic(() => import('react-apexcharts'), { ssr: false });
@@ -23,13 +23,13 @@ export default function RadarChart(props) {
       .sort()
       .map((key) => ({
         name: key,
-        value: parseInt(valores[key]),
+        value: parseInt(valores[0][key]),
       }));
     setKeysValues(newKeysValues);
     
     const formattedData = Object.values(valores).map((key, index) => ({
       name: `Resposta ${index + 1}`,
-      data: Object.keys(key).filter(k => k !== 'total').map(k => key[k])
+      data: newKeysValues.map((item) => key[item.name])
     }));
 
     setSeries(formattedData);
@@ -110,5 +110,5 @@ export default function RadarChart(props) {
         type="radar"
       />
     </Box>
-  );
+  )
 }
