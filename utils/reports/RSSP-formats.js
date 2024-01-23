@@ -16,7 +16,7 @@ const formatData = async (data) => {
                 naturalidade: data.user.birthCity,
                 data_de_nascimento: data.user.birthDate ? new Date(data.user.birthDate.seconds * 1000).toLocaleDateString() : '',
                 atleta: data.user.isAthlete ? 'SIM' : 'NAO',
-                tempo_de_pratica: data.user.practiceTime ?? '-',
+                tempo_de_pratica: data.user.timePratice ?? '-',
                 nivel_do_atleta: data.user.athleteLevel ?? '-',
                 nivel_competitivo: data.user.competitiveLevel ?? '-',
                 data_da_resposta: answer.created_at ? new Date(answer.created_at.seconds * 1000).toLocaleDateString() : 'Não encontrada',

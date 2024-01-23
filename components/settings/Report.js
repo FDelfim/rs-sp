@@ -8,26 +8,12 @@ import xlsx from 'json-as-xlsx'
 import { storeReport } from '../../services/reportServices'
 import { json2csv } from 'json-2-csv'
 import { jsonToPlainText } from 'json-to-plain-text'
-import { collection, getDocs, limit, orderBy, query, startAt } from 'firebase/firestore'
+import { collection, endBefore, getDocs, limit, orderBy, query, startAfter, startAt } from 'firebase/firestore'
 import { db } from '../../lib/firebase'
 import { Badge } from '@chakra-ui/react'
 
 
 const reportsCollection = collection(db, 'reports');
-
-const getHistory = async ({ page }) => {
-    const pageSize = 5;
-    let result = []
-    try {
-        const querySnapshot = await getDocs(query(reportsCollection, limit(pageSize), orderBy('created_at'), startAt(pageSize * (page - 1))));
-        querySnapshot.docs.map((doc) => {
-            result.push(doc.data());
-        });
-    } catch (err) {
-        throw err;
-    }
-    return result;
-}
 
 export default function Report() {
     const [inicio, setInicio] = useState('');
@@ -35,10 +21,11 @@ export default function Report() {
     const [tipo, setTipo] = useState([]);
     const [format, setFormat] = useState('');
     const [recent, setRecent] = useState([]);
+    const [last, setLast] = useState(undefined);
+    const [page, setPage] = useState(1);
+    const [history, setHistory] = useState([]);
     const toast = useToast();
 
-    const [history, setHistory] = useState([]);
-    const [page, setPage] = useState(1);
 
     const handleDownload = (format, report) => {
 
@@ -90,12 +77,37 @@ export default function Report() {
         }
     }
 
+    const getHistory = async (page) => {
+        const pageSize = 5;
+        const field = 'created_at';
+        let result = []
+        console.log(history.length)
+        try {
+            const querySnapshot = await getDocs(query(reportsCollection, limit(pageSize), orderBy('created_at'), 
+                page == -1 ? 
+                endBefore(history.length ? history[history.length - 1][field] : 0) :
+                startAfter(history.length ? history[history.length - 1][field] : 0)
+            ));
+            
+            if(querySnapshot.docs.length === 0){
+                result = history;
+            }else{
+                querySnapshot.docs.map((doc) => {
+                    result.push(doc.data());
+                }); 
+            }
+        } catch (err) {
+            throw err;
+        }
+        return result;
+    }
+    
     useEffect(() => {
         const getData = async () => {
-            setHistory(await getHistory({ page }));
+            setHistory(await getHistory(page));
         }
         getData();
-    }, [])
+    }, [page])
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -123,6 +135,15 @@ export default function Report() {
 
         try {
             getJsonReport(data).then((res) => {
+                if(res.length === 0){
+                    return toast({
+                        title: 'Atenção',
+                        description: 'Não há respostas as informações selecionadas.',
+                        status: 'warning',
+                        duration: 3000,
+                        isClosable: true,
+                    });
+                }
                 let report = {
                     data: { ...res },
                     inicio: new Date(inicioTimestamp),
@@ -236,10 +257,16 @@ export default function Report() {
             </Card>
             <Card mt='5' mx={['', '', '', '10%']} p='4' variant='elevated'>
                 <Heading fontSize='xl' mb='0' fontWeight='bold'>Relatórios gerados</Heading>
+                {
+                    (!recent.data && !history) && 
+                    <>
+                        <Text textAlign='center' color='grey' fontSize='md' mb='0' fontWeight='bold'>Nenhum relatório gerado ainda.</Text>
+                    </>
+                }
                 <>
                     <Flex justifyContent='end'>
-                        <Button colorScheme='teal' onClick={() => { setPage(page - 1) }}><FiArrowLeft /></Button>
-                        <Button colorScheme='teal' onClick={() => { setPage(page + 1) }} ml='2'><FiArrowRight /></Button>
+                        <Button colorScheme='teal' onClick={() => { setPage(-1) }}><FiArrowLeft /></Button>
+                        <Button colorScheme='teal' onClick={() => { setPage(1) }} ml='2'><FiArrowRight /></Button>
                     </Flex>
                     {
                         recent.data && <>
@@ -266,7 +293,6 @@ export default function Report() {
                                     </Box>
                                 </Flex>
                             </Card>
-
                         </>
                     }
                     {
