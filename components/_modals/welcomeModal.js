@@ -14,6 +14,7 @@ export default function WelcomeModal({ isOpen, setIsOpen, session, update }) {
 
   const [userData, setUserData] = useState({
     birthCity: null,
+    currentCity: null,
     birthDate: null,
     modality: null,
     timePratice: null,
@@ -101,6 +102,13 @@ export default function WelcomeModal({ isOpen, setIsOpen, session, update }) {
                 <FormLabel>Naturalidade</FormLabel>
                 <Input type="text" placeholder="e.g. Belo Horizonte" onChange={(e) =>
                   setUserData({ ...userData, birthCity: e.target.value })
+                }
+                />
+              </FormControl>
+              <FormControl mt="3" isRequired>
+                <FormLabel>Cidade atual</FormLabel>
+                <Input type="text" placeholder="e.g. Belo Horizonte" onChange={(e) =>
+                  setUserData({ ...userData, currentCity: e.target.value })
                 }
                 />
               </FormControl>

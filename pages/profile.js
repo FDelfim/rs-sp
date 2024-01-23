@@ -78,7 +78,7 @@ export default function Profile() {
       <Layout>
         <Flex mx={['3', '25', '30']} mt={['4', '4', '10']} flexDirection={['column', 'column', 'column', 'row' ,'row']}>
           <Flex justifyContent='center'>
-            <Box align='center' flexDirection={['column', 'column']} gap='4' p='3' w={['90%', '90%', '80%', '70%','25vw']} minH={['', '','','', '80vh']} me={['', '', '5']}>
+            <Box align='center' flexDirection={['column', 'column']} gap='4' p='3' w={['90%', '90%', '80%', '100%','25vw']} minH={['', '','','', '80vh']} me={['', '', '5']}>
               <Skeleton isLoaded={isLoaded}>
                 <Avatar mb='2' size='2xl' name={session?.user.name} src={session?.user.image} />
               </Skeleton>
@@ -102,14 +102,26 @@ export default function Profile() {
                               <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Data de Nascimento:</strong> {new Date(userInfo?.birthDate?.seconds * 1000).toLocaleDateString()}</Text>
                               <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Naturalidade:</strong> {userInfo.birthCity}</Text>
                               <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>E-mail:</strong> {userInfo.email}</Text>
+                              <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Cidade atual:</strong> {userInfo.currentCity}</Text>
                               <Divider />
                               <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Última resposta:</strong> {new Date(userInfo?.lastAnswer?.seconds * 1000).toLocaleDateString('br')}</Text>
                               <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Próxima repostas:</strong> {new Date(userInfo?.lastAnswer.seconds * 1000 + 90 * 24 * 60 * 60 * 1000).toLocaleDateString()}</Text>
-                              <Grid templateColumns={['repeat(1, 1fr)', 'repeat(3, 1fr)']}>
-                                <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.isAthlete ? 'teal' : 'yellow'}>{userInfo?.isAthlete ? 'Atleta' : 'Não atleta'}</Badge> </Text>
-                                <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.athleteLevel === 'Profissional' ? 'teal' : 'yellow'}>{userInfo?.athleteLevel}</Badge></Text>
-                                <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.practicesSport ? 'teal' : 'yellow'}>{userInfo?.practicesSport ? 'Pratica esporte' : 'Não pratica esporte'}</Badge> </Text>
-                              </Grid>
+                              <Box>
+                                {
+                                  userInfo?.isAthlete &&
+                                  <>
+                                    <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Nível competitvo: </strong><Badge colorScheme={'teal'}>{userInfo?.competitiveLevel }</Badge> </Text>
+                                    <Text fontSize={['sm', 'md']} m='0' textAlign='start' fontWeight='500'><strong>Nível de atleta: </strong><Badge colorScheme={userInfo?.athleteLevel === 'Profissional' ? 'teal' : 'yellow'}>{userInfo?.athleteLevel}</Badge></Text>
+                                  </>
+                                }
+                                {
+                                  !userInfo?.isAthlete &&
+                                  <>
+                                    <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={userInfo?.practicesSport ? 'teal' : 'yellow'}>{userInfo?.practicesSport ? 'Pratica esporte' : 'Não pratica esporte'}</Badge> </Text>
+                                    <Text fontSize={['sm', 'md']} m='0' fontWeight='500'><Badge colorScheme={'yellow'}>Não atleta</Badge> </Text>
+                                  </>
+                                }
+                              </Box>
                               <Button colorScheme='teal' size='sm' w='100%' onClick={() => { onOpenEditUser() }}>Editar dados</Button>
                             </Box>
                             :
