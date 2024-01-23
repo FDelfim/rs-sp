@@ -11,9 +11,8 @@ const averageSample = async (score, sample, isClassified) => {
             let sub = 0;
             let avg, arr;
             if(isClassified){
-                sub = score[prop] / arr.lenght;
-                arr = sample[prop];
-                avg = calculateAverage(arr) - sub;
+                arr = [...sample[prop]];
+                avg = calculateAverage(arr);
             }else{
                 arr = [score[prop], ...sample[prop]];
                 avg = calculateAverage(arr);

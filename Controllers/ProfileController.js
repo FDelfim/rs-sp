@@ -161,17 +161,19 @@ export const getQuestionnaire = async (id) => {
 
 const updateUser = async (user) => {
     try {
-        const docRef = doc(usersCollection, user.id);
+        const docRef = doc(usersCollection, user.userId);
         await updateDoc(docRef, user);
     } catch (error) {
         throw error;
     }
 }
 
-const updateAmateurSample = async (sample) => {
+export const updateAmateurSample = async (sample, update, user) => {
     try {
         const docRef = doc(settingsCollection, 'amateurSample');
         await updateDoc(docRef, sample);
+        await updateUser({...user, isClassified: true})
+        await update();
     } catch (error) {
         throw error;
     }
@@ -193,8 +195,12 @@ export const userRating = async (user) => {
             } else {
                 const sample = await getAmateurSample();
                 const sums = dimensionsSums(Object.keys(sample), answers, questionnaire);
-                const { userRankOnly, newSample } = await amateurRating(sums, sample, userData.isClassfied ?? false);
-                return { userRank: userRankOnly, sums, answers, questionnaire, questionnaireName };
+                const { userRankOnly, newSample } = await amateurRating(sums, sample, userData.isClassified ?? false);
+                if(user.isClassified){
+                    return { userRank: userRankOnly, sums, answers, questionnaire, questionnaireName };
+                }else{
+                    return { userRank: userRankOnly, sums, answers, questionnaire, questionnaireName, newSample };
+                }
             }
         } else if (answers) {
             const dimensions = [...new Set(questionnaire.map(item => reverseTranslate[item.dimension]))];

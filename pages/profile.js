@@ -8,7 +8,7 @@ import { ArrowDownIcon, ArrowUpIcon, InfoIcon, MinusIcon } from '@chakra-ui/icon
 import { BsWhatsapp, BsTwitter, BsFacebook, BsTelegram, BsShare } from 'react-icons/bs';
 import { useSession } from 'next-auth/react';
 import { translate, colorScale } from '../utils/translates';
-import { userRating, differenceAnswers } from '../Controllers/ProfileController';
+import { userRating, differenceAnswers, updateAmateurSample } from '../Controllers/ProfileController';
 import { abbreviation } from '../utils/translates';
 import Layout from '../components/Layout';
 import RadarChart from '../components/RadarChart';
@@ -52,7 +52,8 @@ export default function Profile() {
   useEffect(() => {
 
     async function rateUser() {
-      const { userRank, sums, answers, questionnaire, questionnaireName } = await userRating(session.user);
+      const { userRank, sums, answers, questionnaire, questionnaireName, newSample } = await userRating(session.user);
+      if(newSample) updateAmateurSample(newSample, update, session.user)
       const userInfo = session.user;
       setUserInfo(userInfo);
       setAnswers(answers);
