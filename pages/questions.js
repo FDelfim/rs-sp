@@ -20,8 +20,8 @@ export function Questions() {
   const [result, setResult] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [answered, setAnswered] = useState(false);
   const [nextAnswer, setNextAnswer] = useState(false);
+  const [saveAnswers, setSaveAnswers] = useState(false);
 
   const { isOpen: info, onToggle: onInfo } = useDisclosure();
 
@@ -61,23 +61,22 @@ export function Questions() {
       }
     };
     fetchQuestionnaires();
-    if (!(session?.user.terms && status !== 'loading')) {
+    if(status === 'loading') setIsLoading(true);
+    else setIsLoading(false);
+
+    if (!(session?.user.terms)) {
       setIsOpen(true);
-      setIsLoading(false);
     } else {
-      setIsLoading(false);
       setIsOpen(false)
       if (session?.user.lastAnswer) {
         getUserAnswers(session.user.userId).then((answers) => {
           if (answers.length > 0) {
             setResult(true);
-            setAnswered(true);
           }
           const nextAnswer = (new Date(session.user?.lastAnswer?.seconds * 1000 + 90 * 24 * 60 * 60 * 1000))
           setNextAnswer(nextAnswer);
           if(nextAnswer < new Date()){
             setResult(false);
-            setAnswered(false);
           }
         }
         )
@@ -85,19 +84,8 @@ export function Questions() {
     }
   }, [status])
 
-  const appendOption = (value, index) => {
-    const questionExists = answers.find((answer) => answer.question === currentQuestion + 1);
-    if (!questionExists) {
-      setAnswers([...answers, { question: currentQuestion, answer: value }]);
-    } else {
-      const newAnswers = [...answers];
-      newAnswers[currentQuestion].answer = value;
-      setAnswers(newAnswers);
-    }
-  }
-
-  const redirectResult = () => {
-    async function saveAnswers() {
+  useEffect(() => { 
+    async function storeAnswers() {
       try {
         const userRef = doc(db, 'users', session.user.userId);
         const userDoc = await getDoc(userRef);
@@ -130,9 +118,24 @@ export function Questions() {
         })
       }
     }
-    if(!answered){
-      saveAnswers();
+    
+    if(saveAnswers){
+      storeAnswers();
     }
+  }, [saveAnswers])
+
+  const appendOption = (value, index) => {
+    const questionExists = answers.find((answer) => answer.question === currentQuestion + 1);
+    if (!questionExists) {
+      setAnswers([...answers, { question: currentQuestion, answer: value }]);
+    } else {
+      const newAnswers = [...answers];
+      newAnswers[currentQuestion].answer = value;
+      setAnswers(newAnswers);
+    }
+  }
+
+  const redirectResult = () => {
     router.push('/profile');
   };
 
@@ -174,6 +177,7 @@ export function Questions() {
                         appendOption={appendOption}
                         answers={answers}
                         setResult={setResult}
+                        setSaveAnswers={setSaveAnswers}
                       />
                     ))}
                   </Flex>

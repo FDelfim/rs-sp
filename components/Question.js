@@ -40,6 +40,7 @@ export default function Question(props) {
             <Button colorScheme='teal' isDisabled={!next} onClick={()=>{
               props.setCurrentQuestion(props.index+1)
               if(props.index+1 === props.questionnaire.questions.length){
+                props.setSaveAnswers(true);
                 props.setResult(true)
               }
             }}

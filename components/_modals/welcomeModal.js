@@ -31,7 +31,11 @@ export default function WelcomeModal({ isOpen, setIsOpen, session, update }) {
     name: 'isAthlete',
     onChange: (e) => {
       e === 'Não' ? e = false : e = true;
-      setUserData({ ...userData, isAthlete: e, practicesSport: e });
+      if(e === true){
+        setUserData({ ...userData, isAthlete: e, practicesSport: e });
+      }else{
+        setUserData({ ...userData, isAthlete: e, athleteLevel: null, modality: null, timePratice: null, competitiveLevel: null });
+      }
     },
   });
 
@@ -39,8 +43,11 @@ export default function WelcomeModal({ isOpen, setIsOpen, session, update }) {
     name: 'practicesSport',
     onChange: (e) => {
       e === 'Não' ? e = false : e = true;
-      setUserData({ ...userData, practicesSport: e });
-      setUserData({ ...userData, athleteLevel: null })
+      if(e === false){
+        setUserData({ ...userData, practicesSport: e, athleteLevel: null, modality: null});
+      }else{
+        setUserData({ ...userData, practicesSport: e, athleteLevel: null });
+      }
     },
   });
 
@@ -120,7 +127,7 @@ export default function WelcomeModal({ isOpen, setIsOpen, session, update }) {
                 />
               </FormControl>
               <FormControl mt="3" isRequired>
-                <FormLabel>Você é atleta?</FormLabel>
+                <FormLabel>Você é atleta? <small>(Profissional/Amador)</small></FormLabel>
                 <RadioGroup display="flex" gap="10px">
                   {['Sim', 'Não'].map((value) => {
                     const radio = getAthleteRadioProps({ value });
@@ -231,7 +238,7 @@ export default function WelcomeModal({ isOpen, setIsOpen, session, update }) {
                 <Checkbox required mt="3" size="lg" colorScheme="teal" isRequired onChange={
                   (e) => setUserData({ ...userData, terms: e.target.checked })
                 }>Estou de acordo e aceito os termos de uso</Checkbox>
-                <Link ml='1' color='teal' display='flex' justifyContent='end' alignItems='end' onClick={() => { setShowTerms(true); setIsOpen(false) }}>(Clique aqui para acessar!)</Link>
+                <Link ml='1' color='teal' display='flex' justifyContent='end' alignItems='end' onClick={() => { setShowTerms(true); }}>(Clique aqui para acessar!)</Link>
               </Flex>
             </ModalBody>
             <ModalFooter>
@@ -242,7 +249,7 @@ export default function WelcomeModal({ isOpen, setIsOpen, session, update }) {
           </form>
         </ModalContent>
       </Modal>
-      <TermsModal isOpen={showTerms} setIsOpen={setShowTerms} setIsOpenWelcomeModal={setIsOpen} />
+      <TermsModal isOpen={showTerms} setIsOpen={setShowTerms} />
     </>
   );
 }

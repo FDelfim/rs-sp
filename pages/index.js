@@ -3,11 +3,12 @@ import { QuestionIcon, CheckIcon, StarIcon, ArrowForwardIcon, ChatIcon } from '@
 import Layout from '../components/Layout';
 import { useRouter } from 'next/navigation';
 import  Footer from '../components/Footer';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 
 export default function Home() {
 
   const router = useRouter();
+  const {data: session } = useSession();
   const bgColor = useColorModeValue('#F7F7F7', '#1A202C');
 
   return (
@@ -55,7 +56,11 @@ export default function Home() {
             </Grid>
             <Flex justify='center' my='8'>
               <Button onClick={() => {
-                  signIn('google', { callbackUrl: '/questions' })
+                  if(!session?.user){
+                    signIn('google', { callbackUrl: '/questions' })
+                  }else{
+                    router.push('/questions')
+                  }
               }}
               colorScheme='teal'>Iniciar <ArrowForwardIcon /></Button>
             </Flex>

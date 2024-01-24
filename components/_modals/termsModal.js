@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { getQuerionnaireTerm } from '../../services/questionnairesServices'
 import { ModalHeader } from 'react-bootstrap';
 
-export default function TermsModal({isOpen, setIsOpen, setIsOpenWelcomeModal}) {
+export default function TermsModal({isOpen, setIsOpen}) {
 
   const [term, setTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -20,7 +20,7 @@ export default function TermsModal({isOpen, setIsOpen, setIsOpenWelcomeModal}) {
   }, [])
 
   return (
-    <Modal blockScrollOnMount={false} isOpen={isOpen} onClose={() => {setIsOpen(false); setIsOpenWelcomeModal(true)} } size="5xl">
+    <Modal blockScrollOnMount={false} isOpen={isOpen} onClose={() => {setIsOpen(false);} } size="5xl">
       <ModalOverlay />
       <ModalContent p={['2','8']}>
         <ModalCloseButton />
