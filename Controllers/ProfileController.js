@@ -190,7 +190,7 @@ export const userRating = async (user) => {
             if (userData.athleteLevel === 'Profissional') {
                 const scale = await getScale('professionalScale');
                 const sums = dimensionsSums(Object.keys(scale), answers, questionnaire);
-                const userRank = rankUser( Object.keys(sums).length > 1 ? sums[1] : sums, scale);
+                const userRank = rankUser( Object.keys(sums).length > 1 ? sums[1] : sums[0], scale);
                 return { userRank, sums, answers, questionnaire, questionnaireName };
             } else {
                 const sample = await getAmateurSample();
