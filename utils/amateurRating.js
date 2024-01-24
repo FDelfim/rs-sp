@@ -4,11 +4,19 @@ const calculateAverage = (arr) => {
     return sum / arr.length;
 }
 
-const averageSample = async (sample) => {
+const averageSample = async (score, sample, isClassified) => {
+    
     for (const prop in sample) {
         if (Object.prototype.hasOwnProperty.call(sample, prop)) {
-            const arr = sample[prop];
-            const avg = calculateAverage(arr);
+            let sub = 0;
+            let avg, arr;
+            if(isClassified){
+                arr = [...sample[prop]];
+                avg = calculateAverage(arr);
+            }else{
+                arr = [score[prop], ...sample[prop]];
+                avg = calculateAverage(arr);
+            }
             sample[prop] = {
                 average: avg,
                 values: arr,
@@ -37,21 +45,12 @@ const standardDeviation = async (data) => {
     return values;
 }
 
+
 export default async function amateurRating (score, sample, isClassified){
-    if (isClassified) {
-        for (const dimension in sample) {
-            for (const [key, value] of Object.entries(sample[dimension])) {
-                if (value === score[dimension]) {
-                    sample[dimension].splice(key, 1)
-                    break;
-                }
-            }
-        }
-    }
-    const value = await averageSample(sample, isClassified);
+    const value = await averageSample(score[0], sample, isClassified)
     const rating = await standardDeviation(value);
-    const userRank = zUserScore(rating, score);
-    const userScore = tUserScore(userRank, score);
+    const userRank = zUserScore(rating, score[0]);
+    const userScore = tUserScore(userRank, score[0]);
     const userRanked = rankUser(userScore);
     const userRankOnly = {};
     let newSample = {};
@@ -59,7 +58,8 @@ export default async function amateurRating (score, sample, isClassified){
         userRankOnly[key] = userRanked[key].rank;
         newSample[key] = userRanked[key].values;
     })
-    return [userRankOnly, newSample];
+
+    return {userRankOnly, newSample};
 }
 
 const zUserScore = (rating, score) => {

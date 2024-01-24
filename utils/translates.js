@@ -13,6 +13,7 @@ const translate = {
     'Apoio Social Familiar': 'familySocialSupport',
     'Apoio Social Esportivo': 'sportSocialSupport',
     'Experiências Esportivas': 'sportExperiences',
+    'Total': 'total'
   }
   
   const colorScale = {

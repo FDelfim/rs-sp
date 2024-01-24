@@ -27,8 +27,12 @@ export const storeUser = async (user, uid) => {
 }
 
 export const updateUser = async (user) => {
-  const userRef = doc(usersCollection, `${user.uid}`);
-  await updateDoc(userRef, user);
+  try{
+    const userRef = doc(usersCollection, `${user.userId}`);
+    await updateDoc(userRef, user);
+  }catch(error){
+    throw error;
+  }
 }
 
 export const getUserInfo = async (user) => {

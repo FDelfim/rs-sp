@@ -4,10 +4,10 @@ import { Box, Flex, Button, Heading, Link, Text, Badge, useToast, Skeleton, Divi
 import RadarChart from './../components/RadarChart';
 import CryptoJS from 'crypto-js';
 import Footer from '../components/Footer';
-import useAuth from '../hooks/useAuth';
 import { useRouter } from 'next/router';
 import { BsWhatsapp, BsTwitter, BsFacebook, BsTelegram, BsShare } from 'react-icons/bs';
 import { translate, colorScale, abbreviation } from '../utils/translates';
+import { useSession } from 'next-auth/react';
 
 
 const secretKey = process.env.NEXT_PUBLIC_CRYPT_KEY;
@@ -18,9 +18,9 @@ export default function result() {
   const [series, setSeries] = useState(null);
   const [rank, setRank] = useState(null);
   const [isLoaded, setIsLoaded] = useState(false);
-  const { user } = useAuth();
   const router = useRouter();
   const toast = useToast();
+  const { data: session } = useSession();
 
   useEffect(() => {
     try{
@@ -30,7 +30,7 @@ export default function result() {
       const decrypted = bytes.toString(CryptoJS.enc.Utf8);
       const splited = decrypted.split('&');
       const userName = splited[0].split('=')[1];
-      const series = JSON.parse(splited[1].split('=')[1])
+      const series = { 0: JSON.parse(splited[1].split('=')[1])}
       const rank = JSON.parse(splited[2].split('=')[1]);
       setUserName(userName);
       setSeries(series);
@@ -96,7 +96,7 @@ export default function result() {
               </Box>
             }
           </Flex>
-          {(user?.name && userName == user?.name) &&
+          {(session?.user.name && userName == session?.user.name) &&
             <Flex direction={['column', 'row']} gap={['0', '50']} alignItems='center' display='flex' justifyContent='center'>
                 <Text fontSize={['md', 'xl']} fontWeight='bold' textAlign='center' mb='0'>Compartilhar resultado</Text>
               <Box display='flex' flexDirection={['row', 'column']} justifyContent='center' m='0'>
@@ -113,7 +113,7 @@ export default function result() {
               }} colorScheme='teal'>Acessar meu perfil</Button>
             </Flex>
           }
-          {!user?.name && <Button onClick={() => {
+          {!session?.user.name && <Button onClick={() => {
             router.push('/');
           }} colorScheme='teal'>Fazer o teste</Button>}
         </Skeleton>

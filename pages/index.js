@@ -1,14 +1,12 @@
 import { useColorModeValue, Box, Flex, Card, Text, Grid, GridItem, Button} from '@chakra-ui/react';
 import { QuestionIcon, CheckIcon, StarIcon, ArrowForwardIcon, ChatIcon } from '@chakra-ui/icons'
-import useAuth from '../hooks/useAuth';
 import Layout from '../components/Layout';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import  Footer from '../components/Footer';
+import { signIn } from 'next-auth/react';
 
 export default function Home() {
 
-  const { user, signin } = useAuth();
   const router = useRouter();
   const bgColor = useColorModeValue('#F7F7F7', '#1A202C');
 
@@ -57,11 +55,7 @@ export default function Home() {
             </Grid>
             <Flex justify='center' my='8'>
               <Button onClick={() => {
-                if (!user) {
-                  signin()
-                } else {
-                  router.push('/questions')
-                }
+                  signIn('google', { callbackUrl: '/questions' })
               }}
               colorScheme='teal'>Iniciar <ArrowForwardIcon /></Button>
             </Flex>

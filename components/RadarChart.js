@@ -9,28 +9,38 @@ export default function RadarChart(props) {
   const valores = props.series;
 
   const colorMode = useColorModeValue('light', 'dark');
-  const labelColor = colorMode === 'light' ? '#263238' : '#ffffff';
-  const primaryRadarColor = colorMode === 'light' ? '#e9e9e9' : '#999999';
-  const secondaryRadarColor = colorMode === 'light' ? '#ffffff' : '#5e6572';
+  const labelColor = colorMode === 'light' ? '#263238' : '#dfdfdf';
+  const primaryRadarColor = colorMode === 'light' ? '#e9e9e9' : '#000000';
+  const secondaryRadarColor = colorMode === 'light' ? '#ffffff' : '#2f2f2f';
+  const strokeColor = colorMode === 'light' ? '#e9e9e9' : '#000000';
+  const [series, setSeries ] = useState([]);
 
   const [keysValues, setKeysValues] = useState([]);
 
   useEffect(() => {
-    const newKeysValues = Object.keys(valores)
+    const newKeysValues = Object.keys(valores[0])
       .filter((key) => key !== 'total')
       .sort()
       .map((key) => ({
         name: key,
-        value: parseInt(valores[key]),
+        value: parseInt(valores[0][key]),
       }));
     setKeysValues(newKeysValues);
+    
+    const formattedData = Object.values(valores).map((key, index) => ({
+      name: `Resposta ${index + 1}`,
+      data: newKeysValues.map((item) => key[item.name])
+    }));
+
+    setSeries(formattedData);
   }, [valores]);
 
   const options = {
+    colors: ['#319795', '#D3B041'],
     plotOptions: {
       radar: {
         polygons: {
-          strokeColor: '#e9e9e9',
+          strokeColor: strokeColor,
           fill: {
             colors: [primaryRadarColor, secondaryRadarColor],
           },
@@ -62,25 +72,19 @@ export default function RadarChart(props) {
     },
     fill: {
       opacity: 0.4,
-      colors: ['#319795'],
     },
     stroke: {
       show: true,
       width: 4,
-      colors: ['#319795'],
     },
     markers: {
-      colors: ['#319795'],
-      strokeColors: '#fff',
+      strokeColors: strokeColor,
       strokeWidth: 2,
     },
     dataLabels: {
       enabled: true,
       background: {
         borderRadius: 3,
-      },
-      style: {
-        colors: ['#319795'],
       },
     },
     responsive: [
@@ -96,11 +100,6 @@ export default function RadarChart(props) {
     ],
   };
 
-  const series = [
-    {
-      data: keysValues.map((item) => item.value),
-    },
-  ];
 
   return (
     <Box w="100%" p="0" m="0">
@@ -111,5 +110,5 @@ export default function RadarChart(props) {
         type="radar"
       />
     </Box>
-  );
+  )
 }
