@@ -4,6 +4,8 @@ import Head from 'next/head';
 import { ChakraProvider, extendTheme, CSSReset } from '@chakra-ui/react';
 import { Global, css } from '@emotion/react';
 import { SessionProvider } from 'next-auth/react';
+import { Analytics } from '@vercel/analytics/react';
+
 
 const myTheme = extendTheme(theme)
 
@@ -36,6 +38,7 @@ export default function App({ Component, pageProps: { session, ...pageProps } })
       <SessionProvider session={session}>
         <GlobalStyle />
         <Component {...pageProps} />
+        <Analytics />
       </SessionProvider>
     </ChakraProvider>
   )
