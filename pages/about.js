@@ -1,6 +1,6 @@
 import React from 'react'
 import Layout from './../components/Layout';
-import { Box, Card, CardBody, Flex, Text, Link } from '@chakra-ui/react';
+import { Card, Text, Link } from '@chakra-ui/react';
 import Footer from '../components/Footer';
 
 export default function about() {
