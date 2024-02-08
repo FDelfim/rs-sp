@@ -13,9 +13,7 @@ const GlobalStyle = ({ children }) => (
   <>
     <Head>
       <meta content="width=device-width, initial-scale=1" name="viewport" />
-      <meta>
-        <meta name="description" content="RS-Sp - Resiliência Pisicológica no Esporte" />
-      </meta>
+      <meta name="description" content="RS-Sp - Resiliência Pisicológica no Esporte" />
     </Head>
     <CSSReset />
     <Global
