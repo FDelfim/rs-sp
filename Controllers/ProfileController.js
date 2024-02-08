@@ -209,7 +209,7 @@ export const userRating = async (user) => {
             Object.keys(sums).forEach((key) => {
                 userRank[key] = sums[key]
             })
-            return { userRank, sums, answers, questionnaire, questionnaireName };
+            return { userRank: userRank > 1 ? userRank[0] : userRank[1], sums, answers, questionnaire, questionnaireName };
         }
         return { userRank: null, sums: null, answers: null, questionnaire: null, questionnaireName: null};
     } catch (error) {
