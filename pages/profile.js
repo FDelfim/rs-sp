@@ -156,7 +156,7 @@ export default function Profile() {
                             <Flex>
                               {Object.entries(userRank).map(([key, value]) => (
                                 key === 'total' &&
-                                <Box key={key}>
+                                <Box key={key} py='4'>
                                   <Badge colorScheme={colorScale[value]}>Nível de resiliência {translate[key]}: {value}</Badge>
                                 </Box>
                               ))}
@@ -218,7 +218,7 @@ export default function Profile() {
                               {
                                 Object.entries(difference).map(([key, value]) => (
                                   <GridItem display='flex' justifyContent='center' rowSpan={1} colSpan={1} key={key}>
-                                    <Badge>{abbreviation[key]}: {value} {value < 0 ? <ArrowDownIcon color='red' /> : ( value == 0 ? <MinusIcon color='grey'/> :<ArrowUpIcon color='green' />)}</Badge>
+                                    <Badge>{abbreviation[key]}: {parseFloat(value).toFixed(1)} {value < 0 ? <ArrowDownIcon color='red' /> : ( value == 0 ? <MinusIcon color='grey'/> :<ArrowUpIcon color='green' />)}</Badge>
                                   </GridItem>
                                 ))
                               }
