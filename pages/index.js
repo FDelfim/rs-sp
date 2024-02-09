@@ -18,20 +18,20 @@ export default function Home() {
         <Flex justifyContent='center' alignItems='center'>
           <Flex flexDirection='column'>
             <Card className='p-5 d-flex flex-column justify-content-center mt-3' h='40vh'>
-              <Text fontSize='3xl' textAlign='center'>Escala de Resiliência no Esporte - RS-SP</Text>
+              <Text fontSize='3xl' as='h1' textAlign='center'>Escala de Resiliência no Esporte - RS-Sp</Text>
             </Card>
             <Grid templateColumns={['repeat(1)', 'repeat(1)' ,'repeat(4, 1fr)']} templateRows={['','','repeat(1, 1fr)']} gap={'6'} mt='4' px={['5','10','20']} h='100%'>
               <GridItem rowSpan={1} colSpan={1}>
                 <Card p='5' justifyContent='center' h='100%'>
                   <Flex alignItems='center' flexDirection={['column', 'row']} gap='5'>
                     <Flex><QuestionIcon fontSize='5xl' color='teal.300' /></Flex>
-                    <Text fontSize='xl' textAlign='center' mt='3'>O teste consiste em 15 perguntas.</Text>
+                    <Text as='h2' fontSize='xl' textAlign='center' mt='3'>O teste consiste em 15 perguntas.</Text>
                   </Flex>
                 </Card>
               </GridItem>
               <GridItem rowSpan={1} colSpan={1}>
                 <Card p='5' justifyContent='center' h='100%'>
-                  <Flex alignItems='center' flexDirection={['column', 'row']} gap='5'>
+                  <Flex as='h2'  alignItems='center' flexDirection={['column', 'row']} gap='5'>
                     <Flex justify='center'><CheckIcon fontSize='5xl' color='teal.300'/></Flex>
                     <Text fontSize='xl' textAlign='center' mt='3'>Você deve responder as perguntas em uma escala de 1 a 5 pontos.</Text>
                   </Flex>
@@ -41,7 +41,7 @@ export default function Home() {
                 <Card p='5' justifyContent='center' h='100%'>
                   <Flex alignItems='center' flexDirection={['column', 'row']} gap='5'>
                     <Flex justify='center'><ChatIcon fontSize='5xl' color='teal.300'/></Flex>
-                    <Text fontSize='xl' textAlign='center' mt='3'>Você deve responder as perguntas considerando como se sente atualmente.</Text>
+                    <Text as='h2'  fontSize='xl' textAlign='center' mt='3'>Você deve responder as perguntas considerando como se sente atualmente.</Text>
                   </Flex>
                 </Card>
               </GridItem>
@@ -49,7 +49,7 @@ export default function Home() {
                 <Card p='5' justifyContent='center' h='100%'>
                   <Flex alignItems='center' flexDirection={['column', 'row']} gap='5'>
                     <Flex justify='center'><StarIcon fontSize='5xl' color='teal.300'/></Flex>
-                    <Text fontSize='xl' textAlign='center' mt='3'>Ao final, você terá resultados do seu nível de resiliência no esporte.</Text>
+                    <Text fontSize='xl' as='h2' textAlign='center' mt='3'>Ao final, você terá resultados do seu nível de resiliência no esporte.</Text>
                   </Flex>
                 </Card>
               </GridItem>

@@ -22,7 +22,7 @@ export function Nav({ openAuthModal }) {
         <Flex alignItems='center' justifyContent='space-between' w='full' maxW='1200px' margin='0 auto' h='60px' px={[4, 8]}>
           <Flex alignItems="center" justifyContent='space-between' gap={3}>
             <Heading size="md" mr={4} mt='2' display={['none', 'none','block']}>
-              <Link href='/'>Resiliência no Esporte</Link>
+              <Link as='h1' href='/'>Resiliência no Esporte</Link>
             </Heading>
             <Link className={router.pathname == "/" ? 'nav-link active' : 'nav-link'} href='/'>Início <span className='sr-only'></span></Link>
             <Link className={router.pathname == "/questions" ? 'nav-link active' : 'nav-link'} href='questions'>Questionário</Link>

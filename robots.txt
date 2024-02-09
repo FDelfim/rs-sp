@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /pages/index.js
+Allow: /pages/about.js
+Allow: /components/Footer.js
+Allow: /components/Navbar.js
