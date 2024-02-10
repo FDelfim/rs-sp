@@ -106,6 +106,9 @@ export function Questions() {
             data.questionnaire = questionnaires[0].id;
             const docRef = doc(answersRef);
             await setDoc(docRef, data);
+            let docAnswer = await getDoc(docRef);
+            const currentUserRef = collection(db, 'users', session.user.userId, 'answers', docAnswer.id, 'user');
+            await setDoc(doc(currentUserRef), session.user);
           }
         }
       } catch (error) {

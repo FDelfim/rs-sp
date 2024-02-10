@@ -81,7 +81,6 @@ export default function Report() {
         const pageSize = 5;
         const field = 'created_at';
         let result = []
-        console.log(history.length)
         try {
             const querySnapshot = await getDocs(query(reportsCollection, limit(pageSize), orderBy('created_at'), 
                 page == -1 ? 
