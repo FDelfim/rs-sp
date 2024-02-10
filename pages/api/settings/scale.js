@@ -1,10 +1,13 @@
 import { collection, doc, setDoc, getDoc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase'
+import { getToken } from "next-auth/jwt"
 
 const settingsCollection = collection(db, 'settings');
 
 export default async (req, res) => {
     if(req.method === 'POST'){
+        const token = await getToken({ req })
+        if(token.data.role !== 'admin') return res.status(403).json({ error: 'Forbidden' });
         const { id, data } = JSON.parse(req.body);
         try {
             const docRef = doc(settingsCollection, id);
