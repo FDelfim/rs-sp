@@ -10,11 +10,7 @@ export default function about() {
         <Text as='h1' fontSize='3xl'>Bem-vindo(a)!</Text>
         <Text as='h2' fontSize='2xl' fontWeight='bold'>Sobre mim</Text>
         <Text as='p' textAlign='justify'>
-          Sou Camila Bicalho, Doutora em Ciências do Esporte com ênfase na Psicologia Esportiva.
-          Sou apaixonada pelo esporte de alto rendimento e sempre acreditei no poder transformador que eles têm na vida das pessoas.
-          Ao longo dos anos, mergulhei em pesquisas e estudos relacionados à psicologia esportiva, com foco especial na resiliência.
-          Minha jornada nessa área me permitiu entender a importância da mentalidade resiliente para o desempenho e bem-estar dos atletas,
-          tanto em suas carreiras esportivas como em suas vidas pessoais.
+        Sou Camila Bicalho, Doutora em Ciências do Esporte com ênfase na Psicologia Esportiva. Sou apaixonada pelo esporte de rendimento e sempre acreditei no poder transformador que ele tem na vida das pessoas. Nos últimos anos, tenho me dedicado aos estudos relacionados à psicologia esportiva, com foco especial na resiliência. Minha jornada nesta área me permitiu entender a importância da mentalidade resiliente para o desempenho e bem-estar dos atletas, tanto em suas carreiras esportivas como em suas vidas pessoais.
         </Text>
         <Text as='h2' fontSize='2xl' fontWeight='bold'>Sobre o site</Text>
         <Text as='p' textAlign='justify'>
@@ -42,14 +38,12 @@ export default function about() {
           A RS-Sp foi validada para a língua portuguesa e sua aplicação permite uma compreensão da resiliência de atletas em diferentes dimensões. Seus resultados têm a capacidade de identificar pontos fortes e áreas de melhoria em cada indivíduo, contribuindo significativamente para o desenvolvimento pessoal e desempenho esportivo.
         </Text>
         <Text as='p' textAlign='justify'>
-          Neste site, além de conhecer mais sobre a RS-Sp e ter acesso gratuito à ela, você encontrará uma rica variedade de conteúdos relacionados à resiliência no esporte. De artigos informativos a estudos de caso inspiradores, dicas práticas e muito mais, meu objetivo é fornecer informações valiosas que ajudem atletas e praticantes a desenvolverem sua mentalidade resiliente.
-        </Text>
+          Neste espaço, além de conhecer mais sobre a RS-Sp e ter acesso gratuito a ela, você estará participando da pesquisa “Avaliação das Características Psicológicas, Sociais e Fisiológicas de Atletas, Paratletas e Treinadores”, registro 56920222.7.0000.5112. Os dados são sigilosos e você não será identificado. Para mais informações veja no Termo de Uso deste aplicativo.        </Text>
         <Text as='p' textAlign='justify'>
           Este espaço não é apenas uma fonte de conhecimento, mas também um ponto de encontro para construir uma comunidade engajada. Encorajo você a compartilhar suas histórias, opiniões e dúvidas nos comentários dos artigos, contribuindo para o crescimento conjunto.
         </Text>
         <Text as='p' textAlign='justify'>
-          Agradeço sua presença e interesse em aprender mais sobre resiliência no esporte. Espero que este site seja um espaço enriquecedor em sua jornada esportiva e pessoal.
-        </Text>
+          Agradeço seu interesse em aprender mais sobre a resiliência no esporte. Espero que este aplicativo seja um espaço enriquecedor em sua jornada esportiva e pessoal!        </Text>
         <Text as='p' textAlign='center'>
           "Com resiliência e determinação, você pode superar qualquer desafio e alcançar novas alturas em sua jornada esportiva e pessoal. Vamos juntos trilhar o caminho do sucesso!"
         </Text>
