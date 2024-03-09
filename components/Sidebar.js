@@ -2,11 +2,13 @@
 
 import React from 'react'
 import { IconButton, Box, CloseButton, Flex, Icon, useColorModeValue, Text, Drawer, DrawerContent, useDisclosure } from '@chakra-ui/react'
-import { FiFileText, FiTrendingUp, FiMenu } from 'react-icons/fi'
+import { FiFileText, FiTrendingUp, FiMenu, FiInfo, FiUserCheck } from 'react-icons/fi'
 
 const LinkItems = [
   { name: 'Escala', icon: FiTrendingUp },
   { name: 'Relatórios', icon: FiFileText },
+  { name: 'Termos de uso', icon: FiUserCheck},
+  { name: 'Sobre', icon: FiInfo}
 ]
 
 export default function Sidebar({ configPage, setConfigPage, children }) {

@@ -6,6 +6,8 @@ import Escala from '../components/settings/Escala';
 import { useToast } from '@chakra-ui/react';
 import Report from '../components/settings/Report';
 import { useSession } from 'next-auth/react';
+import Terms from '../components/settings/Terms';
+import About from '../components/settings/About';
 
 export default function Answers() {
 
@@ -38,6 +40,14 @@ export default function Answers() {
             }
             {configPage == 'Relatórios' &&
               <Report />
+            }
+            {
+              configPage == 'Termos de uso' &&
+              <Terms/>
+            }
+            {
+              configPage == 'Sobre' &&
+              <About/>
             }
           </Sidebar>
         </Layout>
