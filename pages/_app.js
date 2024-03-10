@@ -5,7 +5,7 @@ import { ChakraProvider, extendTheme, CSSReset } from '@chakra-ui/react';
 import { Global, css } from '@emotion/react';
 import { SessionProvider } from 'next-auth/react';
 import { Analytics } from '@vercel/analytics/react';
-
+import 'react-quill/dist/quill.core.css';
 
 const myTheme = extendTheme(theme)
 
